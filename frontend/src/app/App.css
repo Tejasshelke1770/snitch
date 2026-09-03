@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+}
+
+@layer utilities {
+  .glow-gold-sm {
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+  }
+
+  .glow-gold-md {
+    box-shadow: 0 0 35px rgba(245, 158, 11, 0.2);
+  }
+
+  .glow-gold-lg {
+    box-shadow: 0 0 60px -10px rgba(245, 158, 11, 0.22);
+  }
+
+  .border-gold-subtle {
+    border: 1px solid rgba(245, 158, 11, 0.16);
+  }
+}

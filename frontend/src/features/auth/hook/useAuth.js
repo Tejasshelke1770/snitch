@@ -1,16 +1,31 @@
 import { setError, setLoading, setUser } from "../state/auth.slice";
 import { register } from "../service/auth.api";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
+  const { user, loading, error } = useSelector((state) => state.auth);
 
   async function handleRegisterUser({ email, contact, password, fullname, isSeller = false }) {
-    const data = await register({ email, contact, password, fullname, isSeller });
-    dispatch(setUser(data.user));
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const data = await register({ email, contact, password, fullname, isSeller });
+      dispatch(setUser(data.user || data));
+      dispatch(setLoading(false));
+      return { success: true, data };
+    } catch (err) {
+      const message = err.response?.data?.message || err.message || "Registration failed. Please try again.";
+      dispatch(setError(message));
+      dispatch(setLoading(false));
+      return { success: false, error: message };
+    }
   }
 
   return {
+    user,
+    loading,
+    error,
     handleRegisterUser,
   };
 };
