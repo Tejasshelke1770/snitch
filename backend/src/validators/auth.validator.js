@@ -16,9 +16,9 @@ export const registerUserValidator = [
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long"),
   body("fullname").notEmpty().withMessage("Full name is required"),
+  body("isSeller").isBoolean().withMessage("isSeller must be a boolean"),
   validateRequest,
 ];
-
 
 export const loginUserValidator = [
   body("email").isEmail().withMessage("Please provide a valid email"),
@@ -26,4 +26,4 @@ export const loginUserValidator = [
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long"),
   validateRequest,
-]
+];

@@ -12,7 +12,7 @@ const generateToken = (user) => {
 };
 
 export const registerUser = async (req, res) => {
-  const { email, contact, password, fullname } = req.body;
+  const { email, contact, password, fullname, isSeller } = req.body;
 
   const exUser = await userModel.findOne({ $or: [{ email }, { contact }] });
 
@@ -25,6 +25,7 @@ export const registerUser = async (req, res) => {
     contact,
     password,
     fullname,
+    role : isSeller ? "seller" : "buyer",
   });
 
   const token = generateToken(user);
