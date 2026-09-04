@@ -68,7 +68,6 @@ const Login = () => {
 
   return (
     <div className="h-screen w-full overflow-hidden flex bg-[#09090b] text-[#f4efe6] font-sans antialiased select-none">
-      
       {/* LEFT COLUMN: Full-Bleed Editorial Fashion Campaign Showcase */}
       <div className="hidden lg:relative lg:flex lg:w-1/2 xl:w-[55%] h-full flex-col justify-between p-8 xl:p-12 overflow-hidden bg-[#070709]">
         {/* Full Standing Model in Stylish Pose with balanced framing */}
@@ -109,7 +108,11 @@ const Login = () => {
           </div>
 
           <blockquote className="text-2xl xl:text-3xl font-light text-white tracking-tight leading-snug">
-            &ldquo;Dress like you&apos;re <span className="font-serif italic font-normal text-amber-300">already famous</span>, and let your presence speak first.&rdquo;
+            &ldquo;Dress like you&apos;re{" "}
+            <span className="font-serif italic font-normal text-amber-300">
+              already famous
+            </span>
+            , and let your presence speak first.&rdquo;
           </blockquote>
 
           <div className="flex items-center justify-between pt-1 border-t border-white/10">
@@ -128,7 +131,6 @@ const Login = () => {
 
       {/* RIGHT COLUMN: Minimalist Luxury Auth Form */}
       <div className="w-full lg:w-1/2 xl:w-[45%] h-full flex flex-col justify-between px-6 sm:px-12 xl:px-20 py-8 lg:py-10 bg-[#09090b] relative z-10 overflow-y-auto lg:overflow-hidden">
-        
         {/* Top Header / Switch Mode */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 lg:hidden">
@@ -156,22 +158,32 @@ const Login = () => {
 
         {/* Center Form Container */}
         <div className="w-full max-w-md mx-auto my-auto py-4">
-          
           {/* Headline */}
           <div className="mb-7">
             <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-white">
               Welcome back
             </h1>
             <p className="text-zinc-400 text-sm mt-2 leading-relaxed">
-              Enter your credentials to access your personal wardrobe and saved orders.
+              Enter your credentials to access your personal wardrobe and saved
+              orders.
             </p>
           </div>
 
           {/* Success Notification */}
           {successMessage && (
             <div className="mb-5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center gap-2.5">
-              <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-4 h-4 text-amber-400 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <p className="font-medium text-amber-200">{successMessage}</p>
             </div>
@@ -180,16 +192,29 @@ const Login = () => {
           {/* Backend Error Notification */}
           {authError && (
             <div className="mb-5 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2.5">
-              <svg className="w-4 h-4 text-rose-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <svg
+                className="w-4 h-4 text-rose-400 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
               </svg>
               <span>{authError}</span>
             </div>
           )}
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5" noValidate>
-            
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4 sm:space-y-5"
+            noValidate
+          >
             {/* Email Field */}
             <div>
               <label
@@ -200,8 +225,18 @@ const Login = () => {
               </label>
               <div className="relative flex items-center">
                 <div className="absolute left-3.5 text-zinc-500 pointer-events-none">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
                   </svg>
                 </div>
                 <input
@@ -220,7 +255,9 @@ const Login = () => {
                 />
               </div>
               {formErrors.email && (
-                <p className="text-xs text-rose-400 mt-1.5 ml-0.5">{formErrors.email}</p>
+                <p className="text-xs text-rose-400 mt-1.5 ml-0.5">
+                  {formErrors.email}
+                </p>
               )}
             </div>
 
@@ -237,7 +274,9 @@ const Login = () => {
                   href="#forgot-password"
                   onClick={(e) => {
                     e.preventDefault();
-                    alert("Password recovery link sent to your registered email.");
+                    alert(
+                      "Password recovery link sent to your registered email.",
+                    );
                   }}
                   className="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors"
                 >
@@ -246,8 +285,18 @@ const Login = () => {
               </div>
               <div className="relative flex items-center">
                 <div className="absolute left-3.5 text-zinc-500 pointer-events-none">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.8"
+                      d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                    />
                   </svg>
                 </div>
                 <input
@@ -271,19 +320,46 @@ const Login = () => {
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                        d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"
+                      />
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="1.8"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
                     </svg>
                   )}
                 </button>
               </div>
               {formErrors.password && (
-                <p className="text-xs text-rose-400 mt-1.5 ml-0.5">{formErrors.password}</p>
+                <p className="text-xs text-rose-400 mt-1.5 ml-0.5">
+                  {formErrors.password}
+                </p>
               )}
             </div>
 
@@ -296,23 +372,47 @@ const Login = () => {
               >
                 {loading ? (
                   <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-zinc-950" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-zinc-950"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     <span>Signing in...</span>
                   </>
                 ) : (
                   <>
                     <span>Sign In</span>
-                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    <svg
+                      className="w-4 h-4 transition-transform group-hover:translate-x-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M14 5l7 7m0 0l-7 7m7-7H3"
+                      />
                     </svg>
                   </>
                 )}
               </button>
             </div>
-
           </form>
         </div>
 
@@ -320,14 +420,16 @@ const Login = () => {
         <div className="flex items-center justify-between text-[11px] text-zinc-500 tracking-wider">
           <span>&copy; 2026 SNITCH CLOTHING</span>
           <div className="flex items-center gap-4">
-            <span className="hover:text-zinc-400 transition-colors cursor-pointer">Privacy</span>
+            <span className="hover:text-zinc-400 transition-colors cursor-pointer">
+              Privacy
+            </span>
             <span>&bull;</span>
-            <span className="hover:text-zinc-400 transition-colors cursor-pointer">Terms</span>
+            <span className="hover:text-zinc-400 transition-colors cursor-pointer">
+              Terms
+            </span>
           </div>
         </div>
-
       </div>
-
     </div>
   );
 };
