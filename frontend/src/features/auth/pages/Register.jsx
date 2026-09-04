@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { Link } from "react-router";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
 
 const Register = () => {
+  const navigate = useNavigate()
   const { handleRegisterUser, loading, error: authError } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -78,6 +79,7 @@ const Register = () => {
           ? "Account created successfully! Welcome to Snitch Seller Hub."
           : "Account created successfully! Welcome to Snitch."
       );
+      navigate("/"); // Redirect to login page after successful registration
     }
   };
 
@@ -368,7 +370,7 @@ const Register = () => {
               <p className="text-xs sm:text-sm text-zinc-400">
                 Already have an account?{" "}
                 <Link
-                  to="/"
+                  to="/login"
                   className="font-medium text-amber-400 hover:text-amber-300 underline underline-offset-4 decoration-amber-400/30 hover:decoration-amber-300 transition-colors"
                 >
                   Sign in
