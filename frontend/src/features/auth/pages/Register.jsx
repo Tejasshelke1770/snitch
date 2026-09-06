@@ -228,7 +228,7 @@ const Register = () => {
           )}
 
           {/* Signup with Google Button */}
-          {/* <div className="mb-3">
+          <div className="mb-3">
             <button
               type="button"
               onClick={() => {
@@ -268,7 +268,7 @@ const Register = () => {
               <div className="flex-grow border-t border-zinc-800" />
             </div>
           </div>  
-          */}
+         
 
           {/* Registration Form */}
           <form

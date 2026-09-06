@@ -227,7 +227,7 @@ const Login = () => {
               <div className="flex items-center gap-3">
                 <GoogleIcon className="w-4 h-4 shrink-0" />
                 <span className="text-zinc-100 group-hover:text-amber-300 transition-colors">
-                  Login with Google
+                  Continue with Google
                 </span>
               </div>
               <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-500 group-hover:text-amber-400 flex items-center gap-1 transition-colors">
@@ -252,7 +252,7 @@ const Login = () => {
             <div className="relative flex py-3 items-center">
               <div className="flex-grow border-t border-zinc-800" />
               <span className="shrink mx-3 text-[10px] uppercase font-mono tracking-widest text-zinc-500">
-                or continue with email
+                or login with email
               </span>
               <div className="flex-grow border-t border-zinc-800" />
             </div>
