@@ -4,8 +4,9 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import authRouter from "./routes/auth.routes.js";
 import { config } from "./config/config.js";
+import authRouter from "./routes/auth.routes.js";
+import productRouter from "./routes/product.routes.js";
 
 const app = express();
 
@@ -34,6 +35,7 @@ passport.use(
 );
 
 app.use("/api/auth", authRouter);
+app.use("/api/products", productRouter);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "server is running successfully" });
