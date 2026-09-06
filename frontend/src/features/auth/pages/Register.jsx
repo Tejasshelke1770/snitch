@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
+import GoogleIcon from "../components/GoogleIcon";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -225,6 +226,49 @@ const Register = () => {
               <span>{authError}</span>
             </div>
           )}
+
+          {/* Signup with Google Button */}
+          {/* <div className="mb-3">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/api/auth/google/";
+              }}
+              className="w-full py-3 px-4 rounded-xl bg-[#121216] hover:bg-[#181820] border border-zinc-700/80 hover:border-amber-400/80 text-white font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] active:scale-[0.99] flex items-center justify-between group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <GoogleIcon className="w-4 h-4 shrink-0" />
+                <span className="text-zinc-100 group-hover:text-amber-300 transition-colors">
+                  Signup with Google
+                </span>
+              </div>
+              <span className="text-[10px] uppercase font-mono tracking-wider text-zinc-500 group-hover:text-amber-400 flex items-center gap-1 transition-colors">
+                1-Click
+                <svg
+                  className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M14 5l7 7m0 0l-7 7m7-7H3"
+                  />
+                </svg>
+              </span>
+            </button>
+
+            <div className="relative flex py-2.5 items-center">
+              <div className="flex-grow border-t border-zinc-800" />
+              <span className="shrink mx-3 text-[10px] uppercase font-mono tracking-widest text-zinc-500">
+                or register with email
+              </span>
+              <div className="flex-grow border-t border-zinc-800" />
+            </div>
+          </div>  
+          */}
 
           {/* Registration Form */}
           <form

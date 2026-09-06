@@ -1,5 +1,5 @@
 import { setError, setLoading, setUser } from "../state/auth.slice";
-import { register, login } from "../service/auth.api";
+import { register, login, loginWithGoogle } from "../service/auth.api";
 import { useDispatch, useSelector } from "react-redux";
 
 export const useAuth = () => {
@@ -56,11 +56,31 @@ export const useAuth = () => {
     }
   }
 
+  async function handleGoogleLogin() {
+    try {
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+      const data = await loginWithGoogle();
+      dispatch(setUser(data.user || data));
+      dispatch(setLoading(false));
+      return { success: true };
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Google login failed. Please try again.";
+      dispatch(setError(message));
+      dispatch(setLoading(false));
+      return { success: false, error: message };
+    }
+  }
+
   return {
     user,
     loading,
     error,
     handleRegisterUser,
     handleLogin,
+    handleGoogleLogin,
   };
 };
