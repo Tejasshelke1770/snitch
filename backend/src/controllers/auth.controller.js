@@ -72,3 +72,46 @@ export const loginUser = async (req, res) => {
     },
   });
 };
+
+export const googleCallback = async (req, res) => {
+  const { id, displayName, emails, photos } = req.user;
+  const email = emails[0].value;
+  const profilePic = photos[0].value;
+
+  let user = await userModel.findOne({ email });
+  if (user) {
+    const token = generateToken(user);
+    res.cookie("token", token);
+    // return res.status(200).json({
+    //   message: "User logged in successfully",
+    //   user: {
+    //     id: user._id,
+    //     email: user.email,
+    //     contact: user.contact,
+    //     fullname: user.fullname,
+    //     role: user.role,
+    //   },
+    // });
+  }
+
+  if (!user) {
+    user = userModel.create({
+      email,
+      googleId: id,
+      fullname: displayName,
+    });
+    const token = generateToken(user);
+    res.cookie("token", token);
+    // res.status(201).json({
+    //   message: "User registered successfully",
+    //   user: {
+    //     id: user._id,
+    //     email: user.email,
+    //     contact: user.contact,
+    //     fullname: user.fullname,
+    //     role: user.role,
+    //   },
+    // });
+  }
+  res.redirect("http://localhost:5173/");
+};
