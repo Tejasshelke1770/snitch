@@ -31,3 +31,15 @@ export const createProduct = async (req, res) => {
     product,
   });
 };
+
+export const getProductsByUser = async (req, res) => {
+  const user_id = req.user._id;
+
+  const products = await productModel.find({ seller: user_id });
+
+  return res.status(200).json({
+    message: "products fetched successfully",
+    success: true,
+    products,
+  });
+};

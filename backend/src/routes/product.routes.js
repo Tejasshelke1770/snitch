@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { createProduct } from "../controllers/product.controller.js";
+import {
+  createProduct,
+  getProductsByUser,
+} from "../controllers/product.controller.js";
 import { authSellerMiddleware } from "../middlewares/auth.middleware.js";
 import multer from "multer";
 import productValidator from "../validators/product.validator.js";
@@ -20,5 +23,7 @@ productRouter.post(
   productValidator,
   createProduct,
 );
+
+productRouter.get("/seller", authSellerMiddleware, getProductsByUser);
 
 export default productRouter;
