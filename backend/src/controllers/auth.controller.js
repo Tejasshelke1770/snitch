@@ -115,3 +115,14 @@ export const googleCallback = async (req, res) => {
   }
   res.redirect("http://localhost:5173/");
 };
+
+export const getMe = async (req, res) => {
+  const user_id = req.user._id;
+
+  const user = await userModel.findOne(user_id);
+
+  return res.status(200).json({
+    message: "User fetched successfully",
+    user,
+  });
+};

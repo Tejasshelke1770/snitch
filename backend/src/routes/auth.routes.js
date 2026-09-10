@@ -3,6 +3,7 @@ import {
   registerUser,
   loginUser,
   googleCallback,
+  getMe,
 } from "../controllers/auth.controller.js";
 import {
   loginUserValidator,
@@ -10,18 +11,21 @@ import {
 } from "../validators/auth.validator.js";
 import passport from "passport";
 import { config } from "../config/config.js";
+import { authUserMiddleware } from "../middlewares/auth.middleware.js";
 
 const authRouter = express.Router();
 
 authRouter.post("/register", registerUserValidator, registerUser);
 authRouter.post("/login", loginUserValidator, loginUser);
+authRouter.get("/get-me", authUserMiddleware, getMe);
 
 authRouter.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] }),
 ); //redirects to google for authentication
 
-authRouter.get("/google/callback",      // callback route after google authentication
+authRouter.get(
+  "/google/callback", // callback route after google authentication
   passport.authenticate("google", {
     failureRedirect:
       config.NODE_ENV === "development"
