@@ -4,7 +4,9 @@ import { setSellerProducts, setLoading, setError } from "../state/product.slice"
 
 const useProduct = () => {
   const dispatch = useDispatch();
-  const { loading, error, products } = useSelector((state) => state.product || {});
+  const products = useSelector((state) => state.product.products);
+  const loading = useSelector((state) => state.product.loading);
+  const error = useSelector((state) => state.product.error);
 
   const handleCreateProduct = async (formData) => {
     try {
@@ -46,9 +48,9 @@ const useProduct = () => {
   return {
     handleCreateProduct,
     handleGetProducts,
+    products,
     loading,
     error,
-    products
   };
 };
 
