@@ -37,7 +37,7 @@ export const authUserMiddleware = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, config.JWT_SECRET_KEY);
-    const user = await userModel.findOne(decoded._id);
+    const user = await userModel.findById(decoded.id);
 
     if (!user) {
       return res.status(401).json({ message: "Unauthorized" });
