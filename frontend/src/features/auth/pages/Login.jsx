@@ -67,7 +67,9 @@ const Login = () => {
     if (result?.success) {
       setSuccessMessage("Signed in successfully! Redirecting...");
       setTimeout(() => {
-        navigate("/");
+        result.user.role === "buyer"
+          ? navigate("/")
+          : navigate("/seller/dashboard");
       }, 700);
     }
   };
@@ -220,7 +222,7 @@ const Login = () => {
             <button
               type="button"
               // onClick={() => handleGoogleLogin()}
-              onClick={() => window.location.href = "/api/auth/google"}
+              onClick={() => (window.location.href = "/api/auth/google")}
               // href="/api/auth/google"
               className="w-full py-3 px-4 rounded-xl bg-[#121216] hover:bg-[#181820] border border-zinc-700/80 hover:border-amber-400/80 text-white font-semibold text-xs sm:text-sm tracking-wide transition-all duration-300 shadow-[0_4px_20px_rgba(0,0,0,0.4)] hover:shadow-[0_0_30px_rgba(245,158,11,0.2)] active:scale-[0.99] flex items-center justify-between group cursor-pointer"
             >

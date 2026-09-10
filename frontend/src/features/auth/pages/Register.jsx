@@ -80,7 +80,9 @@ const Register = () => {
           : "Account created successfully! Welcome to Snitch.",
       );
       setTimeout(() => {
-        navigate("/login");
+       result.user.role === "buyer"
+          ? navigate("/")
+          : navigate("/seller/dashboard");
       }, 700);
     }
   };
