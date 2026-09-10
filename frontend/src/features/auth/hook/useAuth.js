@@ -1,10 +1,12 @@
 import { setError, setLoading, setUser } from "../state/auth.slice";
-import { register, login, loginWithGoogle } from "../service/auth.api";
+import { register, login, loginWithGoogle, getMe } from "../service/auth.api";
 import { useDispatch, useSelector } from "react-redux";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
-  const { user, loading, error } = useSelector((state) => state.auth);
+  const user = useSelector((state) => state.auth.user);
+  const loading = useSelector((state) => state.auth.loading);
+  const error = useSelector((state) => state.auth.error);
 
   async function handleRegisterUser({
     email,
@@ -25,7 +27,7 @@ export const useAuth = () => {
       });
       dispatch(setUser(data.user || data));
       dispatch(setLoading(false));
-      return { success: true, data };
+      return { success: true, user: data.user };
     } catch (err) {
       const message =
         err.response?.data?.message ||
@@ -40,38 +42,54 @@ export const useAuth = () => {
   async function handleLogin({ email, password }) {
     try {
       dispatch(setLoading(true));
-      dispatch(setError(null));
       const data = await login({ email, password });
       dispatch(setUser(data.user || data));
-      dispatch(setLoading(false));
-      return { success: true, data };
+      return { success: true, user: data.user };
     } catch (err) {
       const message =
         err.response?.data?.message ||
         err.message ||
         "Login failed. Please try again.";
       dispatch(setError(message));
-      dispatch(setLoading(false));
       return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
     }
   }
 
   async function handleGoogleLogin() {
     try {
       dispatch(setLoading(true));
-      dispatch(setError(null));
       const data = await loginWithGoogle();
       dispatch(setUser(data.user || data));
-      dispatch(setLoading(false));
-      return { success: true };
+      return { success: true, user: data.user };
     } catch (err) {
       const message =
         err.response?.data?.message ||
         err.message ||
         "Google login failed. Please try again.";
       dispatch(setError(message));
-      dispatch(setLoading(false));
       return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  }
+
+  async function handleGetMe() {
+    try {
+      dispatch(setLoading(true));
+      const data = await getMe();
+      dispatch(setUser(data.user));
+      return { success: true, user: data.user };
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Google login failed. Please try again.";
+      dispatch(setError(message));
+      return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
     }
   }
 
@@ -82,5 +100,6 @@ export const useAuth = () => {
     handleRegisterUser,
     handleLogin,
     handleGoogleLogin,
+    handleGetMe,
   };
 };
