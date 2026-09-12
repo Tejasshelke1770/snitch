@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import useProduct from "../hook/useProduct";
 
 const Dashboard = () => {
-  const { handleGetProducts, products = [], loading, error } = useProduct();
+  const { handleGetProductsBySeller, products = [], loading, error } = useProduct();
 
   // View state: "grid" or "table"
   const [viewMode, setViewMode] = useState("grid");
@@ -21,7 +21,7 @@ const Dashboard = () => {
   const [copiedId, setCopiedId] = useState(null);
 
   useEffect(() => {
-    handleGetProducts();
+    handleGetProductsBySeller();
   }, []);
 
   // Safe products list
@@ -213,7 +213,7 @@ const Dashboard = () => {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => handleGetProducts()}
+              onClick={() => handleGetProductsBySeller()}
               disabled={loading}
               title="Sync Latest Inventory"
               className="p-2 sm:px-3.5 sm:py-2 rounded-xl border border-zinc-800 hover:border-zinc-700 bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 font-medium text-xs tracking-wide transition-all duration-200 flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
@@ -317,7 +317,7 @@ const Dashboard = () => {
             </div>
             <button
               type="button"
-              onClick={() => handleGetProducts()}
+              onClick={() => handleGetProductsBySeller()}
               className="px-3 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-200 text-xs font-medium transition-colors"
             >
               Retry
