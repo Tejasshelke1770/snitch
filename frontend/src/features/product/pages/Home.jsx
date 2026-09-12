@@ -338,24 +338,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* TOP ANNOUNCEMENT BANNER */}
-      <div className="relative z-40 w-full bg-[#050507] border-b border-zinc-800/80 py-2 px-4 text-center">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-3 text-xs text-zinc-400 font-medium">
-          <span className="inline-flex items-center gap-1.5 text-amber-400 font-semibold tracking-wide">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            ATELIER DROP LIVE
-          </span>
-          <span className="hidden sm:inline text-zinc-700">•</span>
-          <span className="hidden sm:inline text-zinc-300">
-            Complimentary Insured Freight across India on All Orders
-          </span>
-          <span className="hidden md:inline text-zinc-700">•</span>
-          <span className="hidden md:inline font-mono text-[11px] text-amber-300/80">
-            AUREATE OBSIDIAN // 2026
-          </span>
-        </div>
-      </div>
-
       {/* STICKY LUXURY NAVIGATION BAR */}
       <header className="sticky top-0 z-40 bg-[#09090b]/90 backdrop-blur-xl border-b border-zinc-800/90 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
@@ -365,56 +347,7 @@ const Home = () => {
               <span className="text-xl sm:text-2xl font-black tracking-[0.25em] text-white group-hover:text-amber-400 transition-colors uppercase">
                 SNITCH
               </span>
-              <span className="px-2 py-0.5 rounded-full bg-zinc-900/80 border border-amber-500/25 text-amber-400 font-mono text-[10px] tracking-wider uppercase">
-                COUTURE
-              </span>
             </Link>
-
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-zinc-400">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveCategory("all");
-                  document.getElementById("catalog-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`transition-colors cursor-pointer ${
-                  activeCategory === "all" ? "text-amber-400 font-semibold" : "hover:text-zinc-200"
-                }`}
-              >
-                All Pieces
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveCategory("under500");
-                  document.getElementById("catalog-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`transition-colors cursor-pointer ${
-                  activeCategory === "under500" ? "text-amber-400 font-semibold" : "hover:text-zinc-200"
-                }`}
-              >
-                Under ₹500
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveCategory("luxury");
-                  document.getElementById("catalog-section")?.scrollIntoView({ behavior: "smooth" });
-                }}
-                className={`transition-colors cursor-pointer ${
-                  activeCategory === "luxury" ? "text-amber-400 font-semibold" : "hover:text-zinc-200"
-                }`}
-              >
-                Luxury Editions
-              </button>
-              <a
-                href="#atelier-guarantee"
-                className="hover:text-zinc-200 transition-colors"
-              >
-                Atelier Guarantee
-              </a>
-            </nav>
           </div>
 
           {/* Center Search Input */}
@@ -749,26 +682,6 @@ const Home = () => {
 
       {/* MAIN CATALOG DISPLAY */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
-        {/* Section Heading */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 border-b border-zinc-800/80 pb-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-              <span className="text-[11px] uppercase tracking-[0.25em] text-amber-400 font-mono font-semibold">
-                CURATED ACQUISITIONS
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-              Apparel & Silhouettes
-            </h2>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-zinc-400 font-mono">
-            <span>Verified Inventory Engine</span>
-            <span>•</span>
-            <span className="text-amber-400 font-semibold">Aureate Obsidian</span>
-          </div>
-        </div>
-
         {/* Catalog Sync Error Banner */}
         {error && (
           <div className="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-3 shadow-lg">
@@ -839,62 +752,6 @@ const Home = () => {
             ))}
           </div>
         )}
-
-        {/* ATELIER CRAFT GUARANTEE BENTO BOX */}
-        <section id="atelier-guarantee" className="mt-20 p-8 sm:p-10 rounded-2xl bg-[#0e0e12] border border-zinc-800/80 shadow-2xl relative overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-            {/* Feature 1 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="p-3 rounded-xl bg-zinc-900 border border-amber-500/20 text-amber-400 shrink-0">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Architectural Longevity
-                </h4>
-                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                  Tailored with heavyweight cotton weaves designed to hold structural silhouettes through relentless wear cycles.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="p-3 rounded-xl bg-zinc-900 border border-amber-500/20 text-amber-400 shrink-0">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-                  Discreet Armored Shipping
-                </h4>
-                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                  Every order arrives in bespoke, tamper-evident matte black atelier presentation packaging.
-                </p>
-              </div>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-              <div className="p-3 rounded-xl bg-zinc-900 border border-amber-500/20 text-amber-400 shrink-0">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-white uppercase tracking-wider">
-                  White-Glove Exchanges
-                </h4>
-                <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                  Complimentary 10-day door-to-door concierge fitting exchange across all metropolitan delivery hubs.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* QUICK VIEW ATELIER MODAL */}
