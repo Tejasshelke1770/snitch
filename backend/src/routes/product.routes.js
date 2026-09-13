@@ -1,9 +1,13 @@
-import { Router } from "express";
+﻿import { Router } from "express";
 import {
   createProduct,
   getProductsBySeller,
   getAllProducts,
-  getProductById
+  getProductById,
+  // addVariant,
+  // updateVariantStock,
+  // deleteVariant,
+  addProductVariant,
 } from "../controllers/product.controller.js";
 import { authSellerMiddleware } from "../middlewares/auth.middleware.js";
 import multer from "multer";
@@ -27,7 +31,34 @@ productRouter.post(
 );
 
 productRouter.get("/seller", authSellerMiddleware, getProductsBySeller);
-productRouter.get("/", getAllProducts)
-productRouter.get("/details/:id", getProductById)
+productRouter.get("/", getAllProducts);
+productRouter.get("/details/:id", getProductById);
+
+productRouter.post(
+  "/seller/:productId/variants",
+  authSellerMiddleware,
+  upload.array("images", 7),
+  addProductVariant,
+);
+
+// Variant Management routes
+// productRouter.post(
+//   "/:productId/variants",
+//   authSellerMiddleware,
+//   upload.array("images", 5),
+//   addVariant,
+// );
+
+// productRouter.patch(
+//   "/:productId/variants/:variantId/stock",
+//   authSellerMiddleware,
+//   updateVariantStock,
+// );
+
+// productRouter.delete(
+//   "/:productId/variants/:variantId",
+//   authSellerMiddleware,
+//   deleteVariant,
+// );
 
 export default productRouter;
