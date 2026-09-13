@@ -1,159 +1,28 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useProduct from "../hook/useProduct";
 import { useAuth } from "../../auth/hook/useAuth";
 
-// Fallback seed products matching the user's database format to guarantee visibility
-const FALLBACK_PRODUCTS = [
-  {
-    price: {
-      amount: 111,
-      currency: "INR",
-    },
-    _id: "6a9ddf87e52e32fafc82009d",
-    title: "product1",
-    description: "description",
-    seller: "6a9b1176c03d2a28db0c540b",
-    images: [
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg",
-        _id: "6a9ddf87e52e32fafc82009e",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/81Wt6rOkYkL._AC_SR480_440___TJqJRBXS.jpg",
-        _id: "6a9ddf87e52e32fafc82009f",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/71_IECByR9L._AC_SR480_440__SJDFasZxl.jpg",
-        _id: "6a9ddf87e52e32fafc8200a0",
-      },
-    ],
-    createdAt: "2026-09-06T21:47:51.094Z",
-    updatedAt: "2026-09-06T21:47:51.094Z",
-    __v: 0,
-  },
-  {
-    price: {
-      amount: 111,
-      currency: "INR",
-    },
-    _id: "6a9de3173c66cfdc9ac55c93",
-    title: "product1",
-    description: "description",
-    seller: "6a9b1176c03d2a28db0c540b",
-    images: [
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__-wEJZOlXG.jpg",
-        _id: "6a9de3173c66cfdc9ac55c94",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/81Wt6rOkYkL._AC_SR480_440__W6XnOFJD_.jpg",
-        _id: "6a9de3173c66cfdc9ac55c95",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/71_IECByR9L._AC_SR480_440__RbfPtyKbj.jpg",
-        _id: "6a9de3173c66cfdc9ac55c96",
-      },
-    ],
-    createdAt: "2026-09-06T22:03:03.412Z",
-    updatedAt: "2026-09-06T22:03:03.412Z",
-    __v: 0,
-  },
-  {
-    price: {
-      amount: 111,
-      currency: "INR",
-    },
-    _id: "6aa1b92a1983be44a7fdd3d1",
-    title: "product1",
-    description: "description",
-    seller: "6a9b1176c03d2a28db0c549b",
-    images: [
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg",
-        _id: "6a9ddf87e52e32fafc82009e",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/81Wt6rOkYkL._AC_SR480_440___TJqJRBXS.jpg",
-        _id: "6a9ddf87e52e32fafc82009f",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/71_IECByR9L._AC_SR480_440__SJDFasZxl.jpg",
-        _id: "6a9ddf87e52e32fafc8200a0",
-      },
-    ],
-    createdAt: "2026-09-06T21:47:51.094Z",
-    updatedAt: "2026-09-06T21:47:51.094Z",
-    __v: 0,
-  },
-  {
-    price: {
-      amount: 111,
-      currency: "INR",
-    },
-    _id: "6aa1d9cfc2b4d7ffb5a0904b",
-    title: "product1",
-    description: "description",
-    seller: "6a9b1176c03d2a28db0c540b",
-    images: [
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__DfZGmc1qAV.jpg",
-        _id: "6aa1d9cfc2b4d7ffb5a0904c",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/81Wt6rOkYkL._AC_SR480_440__qFpNaYkRX.jpg",
-        _id: "6aa1d9cfc2b4d7ffb5a0904d",
-      },
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/71_IECByR9L._AC_SR480_440__xoFTqTGby.jpg",
-        _id: "6aa1d9cfc2b4d7ffb5a0904e",
-      },
-    ],
-    createdAt: "2026-09-09T22:12:31.619Z",
-    updatedAt: "2026-09-09T22:12:31.619Z",
-    __v: 0,
-  },
-  {
-    price: {
-      amount: 999,
-      currency: "INR",
-    },
-    _id: "6aa1eb74c2b4d7ffb5a0904f",
-    title: "from browser",
-    description: "from browser",
-    seller: "6a9b1176c03d2a28db0c540b",
-    images: [
-      {
-        url: "https://ik.imagekit.io/0etg1a8vc/snitch/71_IECByR9L._AC_SR480_440__Yed0PIlaB.jpg",
-        _id: "6aa1eb74c2b4d7ffb5a09050",
-      },
-    ],
-    createdAt: "2026-09-09T23:27:48.981Z",
-    updatedAt: "2026-09-09T23:27:48.981Z",
-    __v: 0,
-  },
-];
-
 // Helper to safely extract image URL whether object or string
 const extractImageUrl = (img) => {
-  if (!img) return "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg";
+  if (!img)
+    return "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg";
   if (typeof img === "string") return img;
-  return img.url || "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg";
+  return (
+    img.url ||
+    "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg"
+  );
 };
 
 const Home = () => {
-  const { handleGetAllProducts, AllProducts = [], error, loading } = useProduct();
+  const { handleGetAllProducts, AllProducts = [], error, loading, } = useProduct();
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   // Search, Filter & Sorter State
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
-
-  // Quick View Modal
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
-  const [activeQuickViewImg, setActiveQuickViewImg] = useState(0);
-  const [selectedSize, setSelectedSize] = useState("M");
 
   // Shopping Bag State
   const [cartItems, setCartItems] = useState([]);
@@ -165,10 +34,8 @@ const Home = () => {
   // Toast message feedback
   const [toastMessage, setToastMessage] = useState(null);
 
-  // Load products from backend on mount
   useEffect(() => {
     handleGetAllProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keyboard shortcut: Cmd/Ctrl + K focuses search bar
@@ -197,7 +64,7 @@ const Home = () => {
     if (Array.isArray(AllProducts) && AllProducts.length > 0) {
       return AllProducts;
     }
-    return FALLBACK_PRODUCTS;
+    return [];
   }, [AllProducts]);
 
   // Filter and Sort products
@@ -208,7 +75,9 @@ const Home = () => {
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
           const matchTitle = (product.title || "").toLowerCase().includes(q);
-          const matchDesc = (product.description || "").toLowerCase().includes(q);
+          const matchDesc = (product.description || "")
+            .toLowerCase()
+            .includes(q);
           const matchSeller = (product.seller || "").toLowerCase().includes(q);
           const amount = product.price?.amount ?? product.price ?? "";
           const matchPrice = amount.toString().includes(q);
@@ -217,7 +86,9 @@ const Home = () => {
           }
         }
 
-        const numericPrice = Number(product.price?.amount ?? product.price ?? 0);
+        const numericPrice = Number(
+          product.price?.amount ?? product.price ?? 0,
+        );
 
         // Category filter
         if (activeCategory === "under500") {
@@ -256,7 +127,7 @@ const Home = () => {
     if (e) e.stopPropagation();
     setCartItems((prev) => {
       const existingIndex = prev.findIndex(
-        (item) => item.product._id === product._id && item.size === size
+        (item) => item.product._id === product._id && item.size === size,
       );
       if (existingIndex > -1) {
         const updated = [...prev];
@@ -271,7 +142,9 @@ const Home = () => {
   // Remove from Bag
   const handleRemoveFromBag = (productId, size) => {
     setCartItems((prev) =>
-      prev.filter((item) => !(item.product._id === productId && item.size === size))
+      prev.filter(
+        (item) => !(item.product._id === productId && item.size === size),
+      ),
     );
   };
 
@@ -286,7 +159,7 @@ const Home = () => {
           }
           return item;
         })
-        .filter(Boolean)
+        .filter(Boolean),
     );
   };
 
@@ -314,10 +187,16 @@ const Home = () => {
   };
 
   // Total Bag Count and Price
-  const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalCartCount = cartItems.reduce(
+    (acc, item) => acc + item.quantity,
+    0,
+  );
   const totalCartPrice = cartItems.reduce(
-    (acc, item) => acc + Number(item.product.price?.amount ?? item.product.price ?? 0) * item.quantity,
-    0
+    (acc, item) =>
+      acc +
+      Number(item.product.price?.amount ?? item.product.price ?? 0) *
+        item.quantity,
+    0,
   );
 
   return (
@@ -331,8 +210,18 @@ const Home = () => {
       {/* TOAST NOTIFICATION */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl bg-zinc-900/95 border border-amber-500/30 text-amber-300 text-xs font-medium shadow-[0_10px_35px_rgba(0,0,0,0.5)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-3 duration-200">
-          <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+          <svg
+            className="w-4 h-4 text-amber-400 shrink-0"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2.5"
+              d="M5 13l4 4L19 7"
+            />
           </svg>
           <span>{toastMessage}</span>
         </div>
@@ -380,8 +269,18 @@ const Home = () => {
                   onClick={() => setSearchQuery("")}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               ) : (
@@ -399,8 +298,18 @@ const Home = () => {
               to="/seller/dashboard"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/90 border border-amber-500/20 text-zinc-300 hover:text-amber-400 hover:border-amber-400/40 text-xs font-medium transition-all"
             >
-              <svg className="w-3.5 h-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <svg
+                className="w-3.5 h-3.5 text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                />
               </svg>
               <span className="hidden sm:inline">Seller Atelier</span>
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -426,12 +335,24 @@ const Home = () => {
             {/* Wishlist Button */}
             <button
               type="button"
-              onClick={() => showToast(`${wishlist.size} saved items in wishlist`)}
+              onClick={() =>
+                showToast(`${wishlist.size} saved items in wishlist`)
+              }
               aria-label="Saved items"
               className="relative p-2 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-amber-400/30 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
             >
-              <svg className="w-4 h-4" fill={wishlist.size > 0 ? "#f59e0b" : "none"} stroke={wishlist.size > 0 ? "#f59e0b" : "currentColor"} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              <svg
+                className="w-4 h-4"
+                fill={wishlist.size > 0 ? "#f59e0b" : "none"}
+                stroke={wishlist.size > 0 ? "#f59e0b" : "currentColor"}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
               </svg>
               {wishlist.size > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-zinc-950 font-bold text-[9px] flex items-center justify-center">
@@ -447,10 +368,22 @@ const Home = () => {
               aria-label="Shopping Bag"
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 border border-amber-500/30 hover:border-amber-400 text-zinc-200 transition-all shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_25px_rgba(245,158,11,0.25)] cursor-pointer"
             >
-              <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              <svg
+                className="w-4 h-4 text-amber-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                />
               </svg>
-              <span className="text-xs font-semibold hidden sm:inline">Bag</span>
+              <span className="text-xs font-semibold hidden sm:inline">
+                Bag
+              </span>
               <span className="w-5 h-5 rounded-full bg-amber-400 text-zinc-950 font-bold text-[11px] flex items-center justify-center">
                 {totalCartCount}
               </span>
@@ -472,8 +405,16 @@ const Home = () => {
                   AUTUMN / WINTER 2026 DROP
                 </span>
                 <span className="text-xs text-zinc-400 flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  <svg
+                    className="w-3.5 h-3.5 text-amber-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clipRule="evenodd"
+                    />
                   </svg>
                   <span>Limited Batch Edition</span>
                 </span>
@@ -488,7 +429,9 @@ const Home = () => {
                   </span>
                 </h1>
                 <p className="text-zinc-300 text-sm sm:text-base leading-relaxed max-w-xl">
-                  Architectural silhouettes forged with high-density textiles, antiqued brass hardware, and minimalist streetwear tailoring. Built for the modern vanguard.
+                  Architectural silhouettes forged with high-density textiles,
+                  antiqued brass hardware, and minimalist streetwear tailoring.
+                  Built for the modern vanguard.
                 </p>
               </div>
 
@@ -525,13 +468,25 @@ const Home = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    document.getElementById("catalog-section")?.scrollIntoView({ behavior: "smooth" });
+                    document
+                      .getElementById("catalog-section")
+                      ?.scrollIntoView({ behavior: "smooth" });
                   }}
                   className="px-6 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-zinc-950 font-bold text-xs tracking-wider uppercase transition-all shadow-[0_0_25px_rgba(245,158,11,0.3)] hover:shadow-[0_0_35px_rgba(245,158,11,0.45)] flex items-center gap-2 cursor-pointer"
                 >
                   <span>Explore Collection</span>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                      d="M19 14l-7 7m0 0l-7-7m7 7V3"
+                    />
                   </svg>
                 </button>
 
@@ -545,10 +500,22 @@ const Home = () => {
 
               {/* Authenticity Badge */}
               <div className="flex items-center gap-2 text-xs text-zinc-500">
-                <svg className="w-4 h-4 text-amber-400/80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                <svg
+                  className="w-4 h-4 text-amber-400/80"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  />
                 </svg>
-                <span>Live seller inventory verified directly via Snitch API engine.</span>
+                <span>
+                  Live seller inventory verified directly via Snitch API engine.
+                </span>
               </div>
             </div>
 
@@ -647,7 +614,9 @@ const Home = () => {
             {/* Live Counter */}
             <span className="text-zinc-500 font-mono hidden sm:inline">
               Showing{" "}
-              <strong className="text-amber-400">{filteredProducts.length}</strong>{" "}
+              <strong className="text-amber-400">
+                {filteredProducts.length}
+              </strong>{" "}
               {filteredProducts.length === 1 ? "piece" : "pieces"}
             </span>
 
@@ -665,7 +634,10 @@ const Home = () => {
                 <option value="price-low" className="bg-zinc-900 text-zinc-200">
                   Price: Low to High
                 </option>
-                <option value="price-high" className="bg-zinc-900 text-zinc-200">
+                <option
+                  value="price-high"
+                  className="bg-zinc-900 text-zinc-200"
+                >
                   Price: High to Low
                 </option>
                 <option value="newest" className="bg-zinc-900 text-zinc-200">
@@ -686,8 +658,18 @@ const Home = () => {
         {error && (
           <div className="mb-8 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-3 shadow-lg">
             <div className="flex items-center gap-2.5">
-              <svg className="w-4 h-4 text-amber-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-4 h-4 text-amber-400 shrink-0"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <span>{error} - Displaying cached atelier drop.</span>
             </div>
@@ -705,19 +687,34 @@ const Home = () => {
         {loading && (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
             <div className="w-8 h-8 border-2 border-amber-400/20 border-t-amber-400 rounded-full animate-spin" />
-            <span className="text-xs text-zinc-400 font-mono">Loading inventory...</span>
+            <span className="text-xs text-zinc-400 font-mono">
+              Loading inventory...
+            </span>
           </div>
         )}
 
         {/* Empty Search / Filter Results */}
         {!loading && filteredProducts.length === 0 && (
           <div className="p-12 text-center rounded-2xl bg-zinc-900/40 border border-zinc-800">
-            <svg className="w-12 h-12 text-zinc-600 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <svg
+              className="w-12 h-12 text-zinc-600 mx-auto mb-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1.5"
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
-            <h3 className="text-base font-semibold text-zinc-200">No pieces found</h3>
+            <h3 className="text-base font-semibold text-zinc-200">
+              No pieces found
+            </h3>
             <p className="text-xs text-zinc-500 mt-1">
-              Try adjusting your search keyword or clearing the active category filters.
+              Try adjusting your search keyword or clearing the active category
+              filters.
             </p>
             <button
               type="button"
@@ -742,165 +739,13 @@ const Home = () => {
                 formatINR={formatINR}
                 isWishlisted={wishlist.has(product._id)}
                 onToggleWishlist={(e) => toggleWishlist(product._id, e)}
-                onOpenQuickView={() => {
-                  setQuickViewProduct(product);
-                  setActiveQuickViewImg(0);
-                  setSelectedSize("M");
-                }}
                 onAddToBag={(e) => handleAddToBag(product, "M", e)}
+                openProductDetails={() => navigate(`/product/${product._id}`)}
               />
             ))}
           </div>
         )}
       </main>
-
-      {/* QUICK VIEW ATELIER MODAL */}
-      {quickViewProduct && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div
-            className="relative w-full max-w-3xl rounded-2xl bg-[#0f0f13] border border-amber-500/30 shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden p-6 sm:p-8"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              type="button"
-              onClick={() => setQuickViewProduct(null)}
-              className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white rounded-full hover:bg-zinc-800 transition-colors"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-              {/* Image Frame with Thumbnails */}
-              <div className="md:col-span-5 space-y-3">
-                <div className="aspect-[3/4] rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
-                  <img
-                    alt={quickViewProduct.title || "Garment"}
-                    src={extractImageUrl(
-                      quickViewProduct.images?.[activeQuickViewImg] ||
-                      quickViewProduct.images?.[0]
-                    )}
-                    className="w-full h-full object-cover object-center transition-all"
-                  />
-                </div>
-
-                {/* Thumbnails if multiple */}
-                {quickViewProduct.images && quickViewProduct.images.length > 1 && (
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                    {quickViewProduct.images.map((img, idx) => (
-                      <button
-                        key={img._id || idx}
-                        type="button"
-                        onClick={() => setActiveQuickViewImg(idx)}
-                        className={`w-12 h-14 rounded-lg overflow-hidden border transition-all cursor-pointer ${
-                          activeQuickViewImg === idx
-                            ? "border-amber-400 scale-105"
-                            : "border-zinc-800 opacity-60 hover:opacity-100"
-                        }`}
-                      >
-                        <img src={extractImageUrl(img)} alt="" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Details & Action Controls */}
-              <div className="md:col-span-7 space-y-4">
-                <div>
-                  <span className="text-[10px] uppercase tracking-widest text-amber-400 font-mono font-bold block mb-1">
-                    ATELIER PIECE SPECIFICATION
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-bold text-white">
-                    {quickViewProduct.title}
-                  </h3>
-                  <p className="text-xl font-mono font-bold text-amber-400 mt-1">
-                    {formatINR(quickViewProduct.price)}{" "}
-                    <span className="text-xs text-zinc-500 font-normal">
-                      {quickViewProduct.price?.currency || "INR"} (Incl. all taxes)
-                    </span>
-                  </p>
-                </div>
-
-                <p className="text-xs text-zinc-300 leading-relaxed">
-                  {quickViewProduct.description || "Architectural garment engineered for modern silhouette."}
-                </p>
-
-                {/* Garment Technical Specs */}
-                <div className="p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-800 space-y-2 text-xs font-mono">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">ITEM ID:</span>
-                    <span className="text-zinc-300 select-all font-semibold">
-                      {quickViewProduct._id?.slice(0, 10)}...
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">SELLER PORTAL:</span>
-                    <span className="text-amber-400/90 font-semibold">
-                      {quickViewProduct.seller?.slice(0, 8)} (Verified)
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-500">AUTHENTICATION:</span>
-                    <span className="text-amber-300 font-semibold">
-                      100% Genuine Atelier Drop
-                    </span>
-                  </div>
-                </div>
-
-                {/* Size Selector */}
-                <div>
-                  <span className="block text-xs font-semibold text-zinc-300 uppercase tracking-wider mb-2">
-                    Select Fit & Size
-                  </span>
-                  <div className="grid grid-cols-4 gap-2 text-center text-xs">
-                    {["S", "M", "L", "XL"].map((size) => (
-                      <button
-                        key={size}
-                        type="button"
-                        onClick={() => setSelectedSize(size)}
-                        className={`py-2 rounded-lg font-semibold transition-all cursor-pointer ${
-                          selectedSize === size
-                            ? "bg-amber-400 text-zinc-950 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
-                            : "bg-zinc-900 border border-zinc-800 text-zinc-300 hover:border-zinc-700"
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleAddToBag(quickViewProduct, selectedSize);
-                      setQuickViewProduct(null);
-                    }}
-                    className="flex-1 py-3 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs tracking-wide uppercase transition-all shadow-[0_0_20px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2 cursor-pointer"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span>Add To Bag ({selectedSize})</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setQuickViewProduct(null)}
-                    className="px-5 py-3 rounded-xl border border-zinc-800 hover:border-zinc-700 text-zinc-300 text-xs font-semibold transition-all"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* SLIDE-OUT SHOPPING BAG DRAWER */}
       {isBagOpen && (
@@ -924,8 +769,18 @@ const Home = () => {
                     onClick={() => setIsBagOpen(false)}
                     className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
                   >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -934,14 +789,27 @@ const Home = () => {
                 <div className="divide-y divide-zinc-800/80 max-h-[55vh] overflow-y-auto mt-4 pr-1">
                   {cartItems.length === 0 ? (
                     <div className="py-16 text-center text-zinc-500 text-xs">
-                      <svg className="w-12 h-12 text-zinc-700 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      <svg
+                        className="w-12 h-12 text-zinc-700 mx-auto mb-2"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                        />
                       </svg>
                       <span>Your shopping bag is empty.</span>
                     </div>
                   ) : (
                     cartItems.map((item, idx) => (
-                      <div key={`${item.product._id}-${item.size}-${idx}`} className="py-4 flex gap-3.5 items-center">
+                      <div
+                        key={`${item.product._id}-${item.size}-${idx}`}
+                        className="py-4 flex gap-3.5 items-center"
+                      >
                         <div className="w-16 h-20 rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 shrink-0">
                           <img
                             src={extractImageUrl(item.product.images?.[0])}
@@ -959,7 +827,13 @@ const Home = () => {
                           <div className="flex items-center gap-2 mt-2">
                             <button
                               type="button"
-                              onClick={() => handleUpdateQuantity(item.product._id, item.size, -1)}
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.product._id,
+                                  item.size,
+                                  -1,
+                                )
+                              }
                               className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 flex items-center justify-center text-xs font-bold hover:bg-zinc-700"
                             >
                               -
@@ -969,7 +843,13 @@ const Home = () => {
                             </span>
                             <button
                               type="button"
-                              onClick={() => handleUpdateQuantity(item.product._id, item.size, 1)}
+                              onClick={() =>
+                                handleUpdateQuantity(
+                                  item.product._id,
+                                  item.size,
+                                  1,
+                                )
+                              }
                               className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 flex items-center justify-center text-xs font-bold hover:bg-zinc-700"
                             >
                               +
@@ -979,12 +859,18 @@ const Home = () => {
                         <div className="text-right">
                           <div className="text-xs font-mono font-bold text-amber-400">
                             {formatINR(
-                              Number(item.product.price?.amount ?? item.product.price ?? 0) * item.quantity
+                              Number(
+                                item.product.price?.amount ??
+                                  item.product.price ??
+                                  0,
+                              ) * item.quantity,
                             )}
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleRemoveFromBag(item.product._id, item.size)}
+                            onClick={() =>
+                              handleRemoveFromBag(item.product._id, item.size)
+                            }
                             className="text-[10px] text-zinc-500 hover:text-rose-400 mt-2 block"
                           >
                             Remove
@@ -1038,7 +924,8 @@ const Home = () => {
                 SNITCH
               </span>
               <p className="text-xs text-zinc-400 leading-relaxed">
-                Haute couture streetwear division. Engineered for architectural silhouettes, heavy combed fibers, and refined rebellion.
+                Haute couture streetwear division. Engineered for architectural
+                silhouettes, heavy combed fibers, and refined rebellion.
               </p>
               <div className="text-[11px] font-mono text-amber-400/90">
                 Aureate Obsidian Edition
@@ -1052,17 +939,26 @@ const Home = () => {
               </h5>
               <ul className="space-y-2 text-zinc-400">
                 <li>
-                  <a href="#catalog-section" className="hover:text-amber-400 transition-colors">
+                  <a
+                    href="#catalog-section"
+                    className="hover:text-amber-400 transition-colors"
+                  >
                     Autumn / Winter Drop
                   </a>
                 </li>
                 <li>
-                  <a href="#catalog-section" className="hover:text-amber-400 transition-colors">
+                  <a
+                    href="#catalog-section"
+                    className="hover:text-amber-400 transition-colors"
+                  >
                     Heavyweight Overshirts
                   </a>
                 </li>
                 <li>
-                  <a href="#catalog-section" className="hover:text-amber-400 transition-colors">
+                  <a
+                    href="#catalog-section"
+                    className="hover:text-amber-400 transition-colors"
+                  >
                     Luxury Essentials
                   </a>
                 </li>
@@ -1076,17 +972,26 @@ const Home = () => {
               </h5>
               <ul className="space-y-2 text-zinc-400">
                 <li>
-                  <Link to="/seller/dashboard" className="hover:text-amber-400 transition-colors">
+                  <Link
+                    to="/seller/dashboard"
+                    className="hover:text-amber-400 transition-colors"
+                  >
                     Seller Product Matrix
                   </Link>
                 </li>
                 <li>
-                  <Link to="/seller/create-products" className="hover:text-amber-400 transition-colors">
+                  <Link
+                    to="/seller/create-products"
+                    className="hover:text-amber-400 transition-colors"
+                  >
                     Publish New Drop
                   </Link>
                 </li>
                 <li>
-                  <Link to="/login" className="hover:text-amber-400 transition-colors">
+                  <Link
+                    to="/login"
+                    className="hover:text-amber-400 transition-colors"
+                  >
                     Atelier Member Sign In
                   </Link>
                 </li>
@@ -1099,7 +1004,8 @@ const Home = () => {
                 EXCLUSIVE ACCESS
               </h5>
               <p className="text-xs text-zinc-400 mb-3">
-                Receive secret access codes for upcoming capsule releases before public drops.
+                Receive secret access codes for upcoming capsule releases before
+                public drops.
               </p>
               <form
                 onSubmit={(e) => {
@@ -1130,11 +1036,17 @@ const Home = () => {
               © 2026 SNITCH / AUREATE OBSIDIAN ATELIER. ALL RIGHTS RESERVED.
             </div>
             <div className="flex items-center gap-4">
-              <span className="hover:text-zinc-300 cursor-pointer">PRIVACY POLICY</span>
+              <span className="hover:text-zinc-300 cursor-pointer">
+                PRIVACY POLICY
+              </span>
               <span>•</span>
-              <span className="hover:text-zinc-300 cursor-pointer">TERMS OF SERVICE</span>
+              <span className="hover:text-zinc-300 cursor-pointer">
+                TERMS OF SERVICE
+              </span>
               <span>•</span>
-              <span className="hover:text-zinc-300 cursor-pointer">VERIFICATION SPEC</span>
+              <span className="hover:text-zinc-300 cursor-pointer">
+                VERIFICATION SPEC
+              </span>
             </div>
           </div>
         </div>
@@ -1149,14 +1061,19 @@ const ProductCard = ({
   formatINR,
   isWishlisted,
   onToggleWishlist,
-  onOpenQuickView,
   onAddToBag,
+  openProductDetails,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const images = Array.isArray(product.images) && product.images.length > 0
-    ? product.images
-    : [{ url: "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg" }];
+  const images =
+    Array.isArray(product.images) && product.images.length > 0
+      ? product.images
+      : [
+          {
+            url: "https://ik.imagekit.io/0etg1a8vc/snitch/51c-J0lt7KL._AC_SR480_440__dRAJAT-HK.jpg",
+          },
+        ];
 
   const currentImgUrl = extractImageUrl(images[currentImageIndex] || images[0]);
   const amount = product.price?.amount ?? product.price ?? 0;
@@ -1193,7 +1110,7 @@ const ProductCard = ({
       {/* Product Image Frame */}
       <div
         className="relative aspect-[4/4.5] bg-zinc-950 overflow-hidden cursor-pointer"
-        onClick={onOpenQuickView}
+        onClick={() => openProductDetails()}
         onMouseEnter={() => {
           if (images.length > 1) setCurrentImageIndex(1);
         }}
@@ -1204,27 +1121,6 @@ const ProductCard = ({
           src={currentImgUrl}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 brightness-95 contrast-105"
         />
-
-        {/* Hover Quick Action Overlay */}
-        <div className="absolute inset-0 bg-zinc-950/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2.5 p-4">
-          <button
-            type="button"
-            onClick={onOpenQuickView}
-            className="w-full py-2 rounded-xl bg-zinc-900 border border-amber-400/40 text-amber-300 text-xs font-bold hover:bg-amber-400 hover:text-zinc-950 transition-all shadow-lg cursor-pointer"
-          >
-            Quick Atelier View
-          </button>
-          <button
-            type="button"
-            onClick={onAddToBag}
-            className="w-full py-2 rounded-xl bg-amber-400 text-zinc-950 text-xs font-bold hover:bg-amber-300 transition-all flex items-center justify-center gap-1.5 shadow-lg cursor-pointer"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Add To Bag</span>
-          </button>
-        </div>
 
         {/* Multi-Image Indicator Dots */}
         {images.length > 1 && (
@@ -1248,14 +1144,15 @@ const ProductCard = ({
         <div>
           <div className="flex items-baseline justify-between gap-2">
             <h3
-              onClick={onOpenQuickView}
+              onClick={() => openProductDetails()}
               className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors line-clamp-1 cursor-pointer"
             >
               {product.title || "Untitled Garment"}
             </h3>
           </div>
           <p className="text-xs text-zinc-400 line-clamp-2 mt-1 leading-relaxed">
-            {product.description || "Architectural silhouette with tailored drape."}
+            {product.description ||
+              "Architectural silhouette with tailored drape."}
           </p>
         </div>
 
