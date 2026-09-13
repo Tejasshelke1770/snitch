@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import useProduct from "../hook/useProduct";
 
 const Dashboard = () => {
   const { handleGetProductsBySeller, products = [], loading, error } = useProduct();
+  const navigate = useNavigate()
 
   // View state: "grid" or "table"
   const [viewMode, setViewMode] = useState("grid");
@@ -748,7 +749,7 @@ const Dashboard = () => {
               return (
                 <div
                   key={product._id}
-                  onClick={() => openQuickView(product)}
+                  onClick={() => navigate(`/seller/product/${product._id}`)}
                   className="group relative rounded-2xl bg-[#121216] border border-zinc-800 hover:border-amber-400/50 transition-all duration-300 flex flex-col overflow-hidden shadow-[0_4px_30px_rgba(0,0,0,0.3)] hover:-translate-y-1 cursor-pointer"
                 >
                   {/* Visual Presentation Container */}
@@ -947,7 +948,7 @@ const Dashboard = () => {
                   return (
                     <tr
                       key={product._id}
-                      onClick={() => openQuickView(product)}
+                      onClick={() => navigate(`/seller/product/${product._id}`)}
                       className="hover:bg-zinc-800/30 transition-colors cursor-pointer"
                     >
                       {/* Garment & Thumbnail */}
