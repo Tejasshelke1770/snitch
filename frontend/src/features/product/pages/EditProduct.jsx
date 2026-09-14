@@ -17,7 +17,6 @@ const EditProduct = () => {
   const {
     handleGetProductById,
     handleAddProductVariants,
-    handleUpdateVariantStock,
     handleDeleteVariant,
   } = useProduct();
 
@@ -75,60 +74,6 @@ const EditProduct = () => {
   const variantsList = useMemo(() => {
     return Array.isArray(product?.variants) ? product.variants : [];
   }, [product]);
-
-  // Handle stock adjustments via steppers
-  const handleStockStep = async (variantId, currentStock, delta) => {
-    const nextStock = Math.max(0, currentStock + delta);
-    if (nextStock === currentStock) return;
-
-    // Optimistic UI update
-    setProduct((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        variants: prev.variants.map((v) =>
-          v._id === variantId ? { ...v, stock: nextStock } : v,
-        ),
-      };
-    });
-
-    const res = await handleUpdateVariantStock(
-      product._id,
-      variantId,
-      nextStock,
-    );
-    if (res.success && res.product) {
-      setProduct(res.product);
-      showToast(`Stock updated to ${nextStock}`);
-    } else {
-      showToast("Failed to update stock");
-    }
-  };
-
-  // Handle direct stock input change
-  const handleDirectStockChange = async (variantId, val) => {
-    const nextStock = Math.max(0, parseInt(val, 10) || 0);
-
-    setProduct((prev) => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        variants: prev.variants.map((v) =>
-          v._id === variantId ? { ...v, stock: nextStock } : v,
-        ),
-      };
-    });
-
-    const res = await handleUpdateVariantStock(
-      product._id,
-      variantId,
-      nextStock,
-    );
-    if (res.success && res.product) {
-      setProduct(res.product);
-      showToast(`Stock updated to ${nextStock}`);
-    }
-  };
 
   // Handle variant deletion
   const handleDelete = async (variantId) => {
