@@ -127,6 +127,11 @@ export const addProductVariant = async (req, res) => {
   });
 };
 
+// edit product 
+//delete product
+//update vaiant
+//delete variant
+
 // export const addVariant = async (req, res) => {
 //   try {
 //     const { productId } = req.params;
