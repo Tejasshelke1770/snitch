@@ -10,9 +10,8 @@ export const addToCart = async (req, res) => {
 
   const product = await productModel.findOne({
     _id: productId,
-    "variant._id": variantId,
+    "variants._id": variantId,
   });
-  console.log(product);
 
   if (!product) {
     return res.status(404).json({
