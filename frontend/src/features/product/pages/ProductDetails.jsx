@@ -10,12 +10,25 @@ const extractImageUrl = (img) => {
   return img.url || "";
 };
 
+// Safely extract key-value pairs from variant attributes (Object or Map)
+const getVariantAttributes = (variant) => {
+  if (!variant?.attributes) return [];
+  if (variant.attributes instanceof Map) {
+    return Array.from(variant.attributes.entries());
+  }
+  if (typeof variant.attributes === "object") {
+    return Object.entries(variant.attributes);
+  }
+  return [];
+};
+
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { handleGetProductById } = useProduct();
 
   const [product, setProduct] = useState(null);
+  const [selectedVariantId, setSelectedVariantId] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
@@ -43,6 +56,19 @@ const ProductDetails = () => {
         if (id) {
           const res = await handleGetProductById(id);
           setProduct(res);
+
+          // If product has variants, default to the first variant
+          if (res?.variants && Array.isArray(res.variants) && res.variants.length > 0) {
+            setSelectedVariantId(res.variants[0]._id);
+            const variantSize =
+              res.variants[0].attributes?.size ||
+              (res.variants[0].attributes instanceof Map
+                ? res.variants[0].attributes.get("size")
+                : null);
+            if (variantSize) {
+              setSelectedSize(String(variantSize).toUpperCase());
+            }
+          }
         }
       } catch (err) {
         console.error("Failed to fetch product:", err);
@@ -61,9 +87,34 @@ const ProductDetails = () => {
     }
   }, [cartItems]);
 
-  const imagesList = useMemo(() => {
-    return Array.isArray(product?.images) ? product.images : [];
+  const variantsList = useMemo(() => {
+    return Array.isArray(product?.variants) ? product.variants : [];
   }, [product]);
+
+  // Active selected variant object with fallback to first variant
+  const currentVariant = useMemo(() => {
+    if (variantsList.length === 0) return null;
+    return (
+      variantsList.find((v) => v._id === selectedVariantId) || variantsList[0]
+    );
+  }, [variantsList, selectedVariantId]);
+
+  // Reset image index whenever the variant changes
+  useEffect(() => {
+    setSelectedImageIndex(0);
+  }, [selectedVariantId]);
+
+  // Fallback images: use variant images if available and non-empty, else fallback to product images
+  const imagesList = useMemo(() => {
+    if (
+      currentVariant?.images &&
+      Array.isArray(currentVariant.images) &&
+      currentVariant.images.length > 0
+    ) {
+      return currentVariant.images;
+    }
+    return Array.isArray(product?.images) ? product.images : [];
+  }, [product, currentVariant]);
 
   const activeImage = useMemo(() => {
     if (imagesList[selectedImageIndex]) {
@@ -71,6 +122,35 @@ const ProductDetails = () => {
     }
     return imagesList[0] ? extractImageUrl(imagesList[0]) : "";
   }, [imagesList, selectedImageIndex]);
+
+  // Fallback price: use variant price if provided, else fallback to main product price
+  const currentPrice = useMemo(() => {
+    const hasVariantPrice =
+      currentVariant?.price?.amount !== undefined &&
+      currentVariant?.price?.amount !== null;
+    const amount = hasVariantPrice
+      ? currentVariant.price.amount
+      : (product?.price?.amount ?? 0);
+    const currency =
+      currentVariant?.price?.currency || product?.price?.currency || "INR";
+    return {
+      amount: Number(amount),
+      formatted: `₹${Number(amount).toLocaleString("en-IN")}`,
+      currency,
+    };
+  }, [product, currentVariant]);
+
+  // Fallback stock: use variant stock if defined, else null (unspecified / fallback)
+  const currentStock = useMemo(() => {
+    if (
+      currentVariant &&
+      currentVariant.stock !== undefined &&
+      currentVariant.stock !== null
+    ) {
+      return Number(currentVariant.stock);
+    }
+    return null;
+  }, [currentVariant]);
 
   const totalCartCount = useMemo(() => {
     return cartItems.reduce((acc, item) => acc + item.quantity, 0);
@@ -83,14 +163,52 @@ const ProductDetails = () => {
     }, 2800);
   };
 
-  // Add to Cart handler (functional)
+  // Select size and synchronize with variant if one matches
+  const handleSelectSize = (size) => {
+    setSelectedSize(size);
+    if (variantsList.length > 0) {
+      const matchingVariant = variantsList.find((v) => {
+        const s =
+          v.attributes?.size ||
+          (v.attributes instanceof Map ? v.attributes.get("size") : null);
+        return s && String(s).toUpperCase() === size.toUpperCase();
+      });
+      if (matchingVariant) {
+        setSelectedVariantId(matchingVariant._id);
+      }
+    }
+  };
+
+  // Select variant directly and sync size if variant defines a size attribute
+  const handleSelectVariant = (variant) => {
+    setSelectedVariantId(variant._id);
+    const variantSize =
+      variant.attributes?.size ||
+      (variant.attributes instanceof Map ? variant.attributes.get("size") : null);
+    if (variantSize) {
+      setSelectedSize(String(variantSize).toUpperCase());
+    }
+  };
+
+  // Add to Cart handler (with variant attributes and fallback values)
   const handleAddToCart = () => {
     if (!product) return;
 
+    if (currentStock === 0) {
+      showToast("Selected variant is currently out of stock");
+      return;
+    }
+
+    const variantAttrs = currentVariant ? getVariantAttributes(currentVariant) : [];
+    const attrsSummary =
+      variantAttrs.length > 0
+        ? variantAttrs.map(([k, v]) => `${k}: ${v}`).join(", ")
+        : null;
+
+    const cartKey = `${product._id}-${selectedSize}-${currentVariant?._id || "base"}`;
+
     setCartItems((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) => item.productId === product._id && item.size === selectedSize
-      );
+      const existingIndex = prev.findIndex((item) => item.key === cartKey);
 
       if (existingIndex > -1) {
         const updated = [...prev];
@@ -101,20 +219,25 @@ const ProductDetails = () => {
       return [
         ...prev,
         {
+          key: cartKey,
           productId: product._id,
+          variantId: currentVariant?._id || null,
           title: product.title,
-          price: product.price?.amount ?? 0,
-          currency: product.price?.currency || "INR",
+          price: currentPrice.amount,
+          currency: currentPrice.currency,
           size: selectedSize,
           quantity: quantity,
-          image: extractImageUrl(imagesList[0]),
+          image: extractImageUrl(imagesList[0]) || extractImageUrl(product.images?.[0]),
+          attributes: attrsSummary,
         },
       ];
     });
 
     setIsAddedSuccess(true);
     showToast(
-      `Added ${quantity} × ${product.title} (${selectedSize}) to Bag`
+      `Added ${quantity} × ${product.title} (${selectedSize}${
+        attrsSummary ? ` • ${attrsSummary}` : ""
+      }) to Bag`
     );
     setTimeout(() => setIsAddedSuccess(false), 2000);
   };
@@ -133,20 +256,9 @@ const ProductDetails = () => {
     }
   };
 
-  const formatPrice = (val) => {
-    const amount = Number(val?.amount ?? val ?? 0);
-    const currency = val?.currency || "INR";
-    return {
-      formatted: `₹${amount.toLocaleString("en-IN")}`,
-      currency,
-    };
-  };
-
   if (!product) {
     return null;
   }
-
-  const currentPrice = formatPrice(product.price);
 
   return (
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4efe6] font-sans antialiased selection:bg-amber-400 selection:text-zinc-950 flex flex-col relative overflow-x-hidden">
@@ -386,9 +498,29 @@ const ProductDetails = () => {
                 <span className="text-zinc-600">•</span>
                 <span className="text-zinc-400 text-[11px]">128 Ratings</span>
                 <span className="text-zinc-600">•</span>
-                <span className="text-emerald-400 text-[11px] font-medium">
-                  In Stock
-                </span>
+                {currentStock !== null ? (
+                  currentStock === 0 ? (
+                    <span className="text-rose-400 text-[11px] font-semibold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                      Out of Stock
+                    </span>
+                  ) : currentStock < 10 ? (
+                    <span className="text-amber-400 text-[11px] font-medium flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                      Only {currentStock} left!
+                    </span>
+                  ) : (
+                    <span className="text-emerald-400 text-[11px] font-medium flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                      In Stock ({currentStock} available)
+                    </span>
+                  )
+                ) : (
+                  <span className="text-emerald-400 text-[11px] font-medium flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    In Stock
+                  </span>
+                )}
               </div>
             </div>
 
@@ -432,8 +564,8 @@ const ProductDetails = () => {
                     <button
                       key={size}
                       type="button"
-                      onClick={() => setSelectedSize(size)}
-                      className={`h-9 rounded-lg text-xs font-bold transition-all duration-150 flex items-center justify-center border ${
+                      onClick={() => handleSelectSize(size)}
+                      className={`h-9 rounded-lg text-xs font-bold transition-all duration-150 flex items-center justify-center border cursor-pointer ${
                         isSelected
                           ? "bg-amber-400 text-zinc-950 border-amber-400 shadow-sm"
                           : "bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-800 hover:border-zinc-700"
@@ -446,6 +578,164 @@ const ProductDetails = () => {
               </div>
             </div>
 
+            {/* ========================================================== */}
+            {/* VARIANT SELECTOR (Directly below size selection) */}
+            {/* ========================================================== */}
+            {variantsList.length > 0 && (
+              <div className="flex flex-col gap-2.5 pt-3 pb-1 border-t border-zinc-800/80">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <span className="text-zinc-300 font-medium text-[11px] uppercase tracking-wide">
+                      Select Variant / Edition:
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-amber-400 border border-amber-500/20 font-semibold">
+                      {variantsList.length} options
+                    </span>
+                  </div>
+                  {currentVariant && (
+                    <span className="text-[10px] text-zinc-400 truncate max-w-[200px]">
+                      {getVariantAttributes(currentVariant)
+                        .map(([k, v]) => `${k}: ${v}`)
+                        .join(" • ") || "Active Variant"}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {variantsList.map((variant, idx) => {
+                    const isSelected =
+                      (currentVariant?._id || variantsList[0]._id) ===
+                      variant._id;
+
+                    // Fallback to product images if variant has no images
+                    const vImg =
+                      extractImageUrl(variant.images?.[0]) ||
+                      extractImageUrl(product.images?.[0]);
+
+                    // Fallback to product price if variant has no price
+                    const vPrice =
+                      variant.price?.amount !== undefined &&
+                      variant.price?.amount !== null
+                        ? variant.price.amount
+                        : product.price?.amount ?? 0;
+
+                    // Fallback stock indicator
+                    const vStock =
+                      variant.stock !== undefined && variant.stock !== null
+                        ? Number(variant.stock)
+                        : null;
+
+                    const attrs = getVariantAttributes(variant);
+
+                    return (
+                      <button
+                        key={variant._id || idx}
+                        type="button"
+                        onClick={() => handleSelectVariant(variant)}
+                        className={`relative p-2.5 rounded-xl text-left transition-all duration-200 border flex items-center gap-3 cursor-pointer group ${
+                          isSelected
+                            ? "bg-gradient-to-br from-zinc-900 via-zinc-900 to-amber-950/25 border-amber-400/90 ring-1 ring-amber-400/40 shadow-lg shadow-amber-950/20"
+                            : "bg-zinc-900/60 hover:bg-zinc-850 border-zinc-800/90 hover:border-zinc-700 text-zinc-300"
+                        }`}
+                      >
+                        {/* Selected Checkmark Badge */}
+                        {isSelected && (
+                          <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-amber-400 text-zinc-950 flex items-center justify-center shadow-md z-10">
+                            <svg
+                              className="w-2.5 h-2.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="3.5"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          </div>
+                        )}
+
+                        {/* Variant Thumbnail Preview with Fallback indication */}
+                        <div className="w-12 h-14 rounded-lg bg-zinc-950 overflow-hidden border border-zinc-800 shrink-0 relative">
+                          {vImg ? (
+                            <img
+                              src={vImg}
+                              alt={`Variant ${idx + 1}`}
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-[9px] text-zinc-600">
+                              Base
+                            </div>
+                          )}
+                          {variant.images && variant.images.length > 0 ? (
+                            <div className="absolute bottom-0.5 right-0.5 px-1 rounded bg-black/80 text-[8px] text-zinc-300 font-mono">
+                              {variant.images.length} img
+                            </div>
+                          ) : (
+                            <div className="absolute bottom-0.5 right-0.5 px-1 rounded bg-zinc-900/90 text-[7px] text-zinc-500 font-mono">
+                              fallback
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Variant Details & Attribute Pills */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-xs font-bold text-white tracking-tight">
+                              ₹{Number(vPrice).toLocaleString("en-IN")}
+                            </span>
+                            {vStock !== null && (
+                              <span
+                                className={`text-[9px] font-medium ${
+                                  vStock === 0
+                                    ? "text-rose-400"
+                                    : vStock < 10
+                                    ? "text-amber-400"
+                                    : "text-emerald-400"
+                                }`}
+                              >
+                                {vStock === 0
+                                  ? "Out of Stock"
+                                  : vStock < 10
+                                  ? `${vStock} left`
+                                  : `${vStock} in stock`}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Multiple Attributes display */}
+                          <div className="flex flex-wrap gap-1">
+                            {attrs.length > 0 ? (
+                              attrs.map(([key, val]) => (
+                                <span
+                                  key={key}
+                                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                                    isSelected
+                                      ? "bg-amber-400/15 text-amber-300 border border-amber-400/30"
+                                      : "bg-zinc-800/80 text-zinc-300 border border-zinc-700/50"
+                                  }`}
+                                >
+                                  <span className="text-zinc-400 capitalize">
+                                    {key}:
+                                  </span>
+                                  <span className="font-semibold text-white">
+                                    {String(val)}
+                                  </span>
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-[10px] text-zinc-500 italic">
+                                Standard variant
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Quantity Stepper */}
             <div className="flex items-center gap-3 pt-0.5">
               <span className="text-[11px] text-zinc-400 uppercase tracking-wide">
@@ -455,7 +745,7 @@ const ProductDetails = () => {
                 <button
                   type="button"
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-xs"
+                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-xs cursor-pointer"
                 >
                   −
                 </button>
@@ -464,12 +754,23 @@ const ProductDetails = () => {
                 </span>
                 <button
                   type="button"
-                  onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-xs"
+                  onClick={() =>
+                    setQuantity((q) => {
+                      const maxAllowed =
+                        currentStock !== null ? Math.max(1, currentStock) : 10;
+                      return Math.min(maxAllowed, q + 1);
+                    })
+                  }
+                  className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors text-xs cursor-pointer"
                 >
                   +
                 </button>
               </div>
+              {currentStock !== null && quantity >= currentStock && currentStock > 0 && (
+                <span className="text-[10px] text-amber-400">
+                  Max stock reached
+                </span>
+              )}
             </div>
 
             {/* ========================================================== */}
@@ -482,10 +783,13 @@ const ProductDetails = () => {
                 id="add-to-cart-button"
                 type="button"
                 onClick={handleAddToCart}
+                disabled={currentStock === 0}
                 className={`w-full sm:flex-1 h-10.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border shadow ${
-                  isAddedSuccess
+                  currentStock === 0
+                    ? "bg-zinc-900 border-zinc-800 text-zinc-500 cursor-not-allowed"
+                    : isAddedSuccess
                     ? "bg-emerald-600 border-emerald-500 text-white scale-[0.98]"
-                    : "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-white hover:text-amber-300 active:scale-[0.98]"
+                    : "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-white hover:text-amber-300 active:scale-[0.98] cursor-pointer"
                 }`}
               >
                 <svg
@@ -501,7 +805,13 @@ const ProductDetails = () => {
                     d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                   />
                 </svg>
-                <span>{isAddedSuccess ? "✓ Added" : "Add to Cart"}</span>
+                <span>
+                  {currentStock === 0
+                    ? "Out of Stock"
+                    : isAddedSuccess
+                    ? "✓ Added"
+                    : "Add to Cart"}
+                </span>
               </button>
 
               {/* Button 2: Buy Now (NO functionality as explicitly requested) */}
@@ -608,6 +918,18 @@ const ProductDetails = () => {
                 </button>
                 {expandedSection === "details" && (
                   <div className="px-3 pb-3 text-[11px] text-zinc-400 space-y-1.5 border-t border-zinc-800/60 pt-2">
+                    {currentVariant &&
+                      getVariantAttributes(currentVariant).map(([k, v]) => (
+                        <div
+                          key={k}
+                          className="flex justify-between py-0.5 border-b border-zinc-800/40 capitalize"
+                        >
+                          <span className="text-zinc-500">{k}</span>
+                          <span className="text-amber-300/90 font-medium">
+                            {String(v)}
+                          </span>
+                        </div>
+                      ))}
                     <div className="flex justify-between py-0.5 border-b border-zinc-800/40">
                       <span className="text-zinc-500">Fabric</span>
                       <span className="text-zinc-300 font-medium">
@@ -714,7 +1036,7 @@ const ProductDetails = () => {
               ) : (
                 cartItems.map((item, idx) => (
                   <div
-                    key={`${item.productId}-${item.size}-${idx}`}
+                    key={item.key || `${item.productId}-${item.size}-${idx}`}
                     className="flex gap-3 p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800/80 items-center"
                   >
                     <img
@@ -726,15 +1048,22 @@ const ProductDetails = () => {
                       <h4 className="text-xs font-semibold text-white truncate">
                         {item.title}
                       </h4>
-                      <p className="text-[11px] text-zinc-400 mt-0.5">
-                        Size:{" "}
-                        <span className="text-amber-400 font-bold">
-                          {item.size}
+                      <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-zinc-400 mt-0.5">
+                        <span>
+                          Size:{" "}
+                          <span className="text-amber-400 font-bold">
+                            {item.size}
+                          </span>
                         </span>
-                      </p>
-                      <p className="text-[11px] font-mono text-zinc-300 mt-0.5">
-                        ₹{item.price} × {item.quantity} = ₹
-                        {item.price * item.quantity}
+                        {item.attributes && (
+                          <span className="text-zinc-400 text-[10px] truncate max-w-[170px] bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50">
+                            {item.attributes}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] font-mono text-zinc-300 mt-1">
+                        ₹{Number(item.price).toLocaleString("en-IN")} × {item.quantity} = ₹
+                        {(item.price * item.quantity).toLocaleString("en-IN")}
                       </p>
                     </div>
                     <button
