@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router";
 import useProduct from "../hook/useProduct";
+import useCart from "../../cart/hook/useCart";
 
 const AVAILABLE_SIZES = ["S", "M", "L", "XL", "XXL"];
 
@@ -26,6 +27,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { handleGetProductById } = useProduct();
+  const { handleAddItem, handleGetCart } = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
@@ -58,7 +60,11 @@ const ProductDetails = () => {
           setProduct(res);
 
           // If product has variants, default to the first variant
-          if (res?.variants && Array.isArray(res.variants) && res.variants.length > 0) {
+          if (
+            res?.variants &&
+            Array.isArray(res.variants) &&
+            res.variants.length > 0
+          ) {
             setSelectedVariantId(res.variants[0]._id);
             const variantSize =
               res.variants[0].attributes?.size ||
@@ -184,14 +190,16 @@ const ProductDetails = () => {
     setSelectedVariantId(variant._id);
     const variantSize =
       variant.attributes?.size ||
-      (variant.attributes instanceof Map ? variant.attributes.get("size") : null);
+      (variant.attributes instanceof Map
+        ? variant.attributes.get("size")
+        : null);
     if (variantSize) {
       setSelectedSize(String(variantSize).toUpperCase());
     }
   };
 
   // Add to Cart handler (with variant attributes and fallback values)
-  const handleAddToCart = () => {
+  const handleAddItemToCart = () => {
     if (!product) return;
 
     if (currentStock === 0) {
@@ -199,7 +207,9 @@ const ProductDetails = () => {
       return;
     }
 
-    const variantAttrs = currentVariant ? getVariantAttributes(currentVariant) : [];
+    const variantAttrs = currentVariant
+      ? getVariantAttributes(currentVariant)
+      : [];
     const attrsSummary =
       variantAttrs.length > 0
         ? variantAttrs.map(([k, v]) => `${k}: ${v}`).join(", ")
@@ -227,17 +237,21 @@ const ProductDetails = () => {
           currency: currentPrice.currency,
           size: selectedSize,
           quantity: quantity,
-          image: extractImageUrl(imagesList[0]) || extractImageUrl(product.images?.[0]),
+          image:
+            extractImageUrl(imagesList[0]) ||
+            extractImageUrl(product.images?.[0]),
           attributes: attrsSummary,
         },
       ];
     });
 
+    handleAddItem({ productId: product._id, variantId: currentVariant?._id, quantity : quantity });
+
     setIsAddedSuccess(true);
     showToast(
       `Added ${quantity} × ${product.title} (${selectedSize}${
         attrsSummary ? ` • ${attrsSummary}` : ""
-      }) to Bag`
+      }) to Bag`,
     );
     setTimeout(() => setIsAddedSuccess(false), 2000);
   };
@@ -251,7 +265,7 @@ const ProductDetails = () => {
   const prevImage = () => {
     if (imagesList.length > 0) {
       setSelectedImageIndex(
-        (prev) => (prev - 1 + imagesList.length) % imagesList.length
+        (prev) => (prev - 1 + imagesList.length) % imagesList.length,
       );
     }
   };
@@ -617,7 +631,7 @@ const ProductDetails = () => {
                       variant.price?.amount !== undefined &&
                       variant.price?.amount !== null
                         ? variant.price.amount
-                        : product.price?.amount ?? 0;
+                        : (product.price?.amount ?? 0);
 
                     // Fallback stock indicator
                     const vStock =
@@ -689,15 +703,15 @@ const ProductDetails = () => {
                                   vStock === 0
                                     ? "text-rose-400"
                                     : vStock < 10
-                                    ? "text-amber-400"
-                                    : "text-emerald-400"
+                                      ? "text-amber-400"
+                                      : "text-emerald-400"
                                 }`}
                               >
                                 {vStock === 0
                                   ? "Out of Stock"
                                   : vStock < 10
-                                  ? `${vStock} left`
-                                  : `${vStock} in stock`}
+                                    ? `${vStock} left`
+                                    : `${vStock} in stock`}
                               </span>
                             )}
                           </div>
@@ -766,11 +780,13 @@ const ProductDetails = () => {
                   +
                 </button>
               </div>
-              {currentStock !== null && quantity >= currentStock && currentStock > 0 && (
-                <span className="text-[10px] text-amber-400">
-                  Max stock reached
-                </span>
-              )}
+              {currentStock !== null &&
+                quantity >= currentStock &&
+                currentStock > 0 && (
+                  <span className="text-[10px] text-amber-400">
+                    Max stock reached
+                  </span>
+                )}
             </div>
 
             {/* ========================================================== */}
@@ -782,14 +798,14 @@ const ProductDetails = () => {
               <button
                 id="add-to-cart-button"
                 type="button"
-                onClick={handleAddToCart}
+                onClick={handleAddItemToCart}
                 disabled={currentStock === 0}
                 className={`w-full sm:flex-1 h-10.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-2 border shadow ${
                   currentStock === 0
                     ? "bg-zinc-900 border-zinc-800 text-zinc-500 cursor-not-allowed"
                     : isAddedSuccess
-                    ? "bg-emerald-600 border-emerald-500 text-white scale-[0.98]"
-                    : "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-white hover:text-amber-300 active:scale-[0.98] cursor-pointer"
+                      ? "bg-emerald-600 border-emerald-500 text-white scale-[0.98]"
+                      : "bg-zinc-900 hover:bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-white hover:text-amber-300 active:scale-[0.98] cursor-pointer"
                 }`}
               >
                 <svg
@@ -809,8 +825,8 @@ const ProductDetails = () => {
                   {currentStock === 0
                     ? "Out of Stock"
                     : isAddedSuccess
-                    ? "✓ Added"
-                    : "Add to Cart"}
+                      ? "✓ Added"
+                      : "Add to Cart"}
                 </span>
               </button>
 
@@ -908,7 +924,7 @@ const ProductDetails = () => {
                   type="button"
                   onClick={() =>
                     setExpandedSection(
-                      expandedSection === "details" ? null : "details"
+                      expandedSection === "details" ? null : "details",
                     )
                   }
                   className="w-full px-3 py-2 text-left flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-zinc-300 hover:text-white"
@@ -960,7 +976,7 @@ const ProductDetails = () => {
                   type="button"
                   onClick={() =>
                     setExpandedSection(
-                      expandedSection === "shipping" ? null : "shipping"
+                      expandedSection === "shipping" ? null : "shipping",
                     )
                   }
                   className="w-full px-3 py-2 text-left flex items-center justify-between text-[11px] font-semibold uppercase tracking-wider text-zinc-300 hover:text-white"
@@ -1062,7 +1078,8 @@ const ProductDetails = () => {
                         )}
                       </div>
                       <p className="text-[11px] font-mono text-zinc-300 mt-1">
-                        ₹{Number(item.price).toLocaleString("en-IN")} × {item.quantity} = ₹
+                        ₹{Number(item.price).toLocaleString("en-IN")} ×{" "}
+                        {item.quantity} = ₹
                         {(item.price * item.quantity).toLocaleString("en-IN")}
                       </p>
                     </div>
@@ -1090,7 +1107,7 @@ const ProductDetails = () => {
                     {cartItems
                       .reduce(
                         (acc, item) => acc + item.price * item.quantity,
-                        0
+                        0,
                       )
                       .toLocaleString("en-IN")}
                   </span>
