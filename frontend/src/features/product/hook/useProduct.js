@@ -7,7 +7,8 @@ import {
   addProductVariants,
   // addVariant,
   // updateVariantStock,
-  // deleteVariant,
+  deleteProductVariant,
+  deleteProduct,
 } from "../service/product.api";
 import {
   setSellerProducts,
@@ -77,8 +78,18 @@ const useProduct = () => {
   };
 
   const handleGetProductById = async (productId) => {
-    const response = await getProductById(productId);
-    return response.product;
+    try {
+      dispatch(setLoading(true));
+      const response = await getProductById(productId);
+      return { success: true, product: response.product };
+    } catch (err) {
+      const message =
+        err.response?.data?.message || err.message || "Failed to get Product";
+      dispatch(setError(message));
+      return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   const handleAddProductVariants = async ({ productId, formData }) => {
@@ -87,22 +98,39 @@ const useProduct = () => {
     return response.product;
   };
 
-  // const handleCreateVariant = async (productId, variantData) => {
-  //   try {
-  //     dispatch(setLoading(true));
-  //     const response = await addVariant(productId, variantData);
-  //     return { success: true, product: response.product, variant: response.variant };
-  //   } catch (err) {
-  //     const message =
-  //       err.response?.data?.message ||
-  //       err.message ||
-  //       "Failed to create variant. Please try again.";
-  //     dispatch(setError(message));
-  //     return { success: false, error: message };
-  //   } finally {
-  //     dispatch(setLoading(false));
-  //   }
-  // };
+  const handleDeleteVariant = async ({ productId, variantId }) => {
+    try {
+      dispatch(setLoading(true));
+      await deleteProductVariant({ productId, variantId });
+      return { success: true };
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to Delete Variant";
+      dispatch(setError(message));
+      return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    try {
+      dispatch(setLoading(false));
+      await deleteProduct(productId);
+      return { success: true };
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to Delete Product";
+      dispatch(setError(message));
+      return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   // const handleUpdateVariantStock = async (productId, variantId, stock) => {
   //   try {
@@ -117,28 +145,15 @@ const useProduct = () => {
   //   }
   // };
 
-  // const handleDeleteVariant = async (productId, variantId) => {
-  //   try {
-  //     const response = await deleteVariant(productId, variantId);
-  //     return { success: true, product: response.product };
-  //   } catch (err) {
-  //     const message =
-  //       err.response?.data?.message ||
-  //       err.message ||
-  //       "Failed to delete variant.";
-  //     return { success: false, error: message };
-  //   }
-  // };
-
   return {
     handleCreateProduct,
     handleGetProductsBySeller,
     handleGetAllProducts,
     handleGetProductById,
     handleAddProductVariants,
-    // handleCreateVariant,
     // handleUpdateVariantStock,
-    // handleDeleteVariant,
+    handleDeleteVariant,
+    handleDeleteProduct,
     products,
     AllProducts,
     loading,

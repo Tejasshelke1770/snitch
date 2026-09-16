@@ -18,6 +18,7 @@ const EditProduct = () => {
     handleGetProductById,
     handleAddProductVariants,
     handleDeleteVariant,
+    handleDeleteProduct
   } = useProduct();
 
   // Core state - minimal & clean
@@ -25,6 +26,7 @@ const EditProduct = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [reload, setReload] = useState(false);
 
   // New variant form state
   const [variantForm, setVariantForm] = useState({
@@ -45,7 +47,7 @@ const EditProduct = () => {
       if (productId) {
         const data = await handleGetProductById(productId);
         if (isMounted && data) {
-          setProduct(data);
+          setProduct(data.product);
           // initialize default price in form
           setVariantForm((prev) => ({
             ...prev,
@@ -58,7 +60,7 @@ const EditProduct = () => {
     return () => {
       isMounted = false;
     };
-  }, [productId]);
+  }, [productId, reload]);
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -76,14 +78,24 @@ const EditProduct = () => {
   }, [product]);
 
   // Handle variant deletion
-  const handleDelete = async (variantId) => {
+  const handleDeleteVariants = async (variantId) => {
     if (!window.confirm("Are you sure you want to remove this variant?"))
       return;
-
-    const res = await handleDeleteVariant(product._id, variantId);
-    if (res.success && res.product) {
-      setProduct(res.product);
+    const res = await handleDeleteVariant({ productId, variantId });
+    if (res.success) {
+      setReload((val) => !val);
       showToast("Variant removed");
+    } else {
+      showToast("Could not delete variant");
+    }
+  };
+  const handleDeleteProducts = async () => {
+    if (!window.confirm("Are you sure you want to remove this Product?"))
+      return;
+    const res = await handleDeleteProduct(productId);
+    if (res.success) {
+      showToast("Product removed");
+      navigate("/seller/dashboard")
     } else {
       showToast("Could not delete variant");
     }
@@ -159,6 +171,7 @@ const EditProduct = () => {
   }
 
   const primaryImage = extractImageUrl(product.images?.[0]);
+  console.log(primaryImage)
 
   return (
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4efe6] font-sans antialiased selection:bg-amber-400 selection:text-zinc-950 flex flex-col relative">
@@ -342,6 +355,50 @@ const EditProduct = () => {
                 </span>
               </p>
             </div>
+
+            <div className="flex items-center gap-2 pl-1">
+              {/* <button
+                type="button"
+                className="inline-flex items-center gap-1.5 rounded-md border border-zinc-700 bg-zinc-900/80 px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-300 transition-colors hover:border-amber-400/70 hover:text-amber-300"
+                title="Edit Product"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.8"
+                    d="M11 5h2.5A2.5 2.5 0 0116 7.5V8m-7 11H6.5A2.5 2.5 0 014 16.5v-9A2.5 2.5 0 016.5 5H8m8.5 4.5l-7.5 7.5L8 18l1-1.5 7.5-7.5m0 0l2.5-2.5 2.5 2.5-2.5 2.5"
+                  />
+                </svg>
+                <span>Edit</span>
+              </button> */}
+
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-md border border-zinc-700 bg-zinc-900/80 p-1.5 text-zinc-400 transition-colors hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-400"
+                title="Delete Product"
+                onClick={handleDeleteProducts}
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.8"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -520,26 +577,26 @@ const EditProduct = () => {
 
                         {/* Actions */}
                         <td className="py-3 px-4 text-right">
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(variant._id)}
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteVariants(variant._id)}
                             className="p-1.5 rounded-md text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                            title="Delete Variant"
-                          >
-                            <svg
-                              className="w-4 h-4"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
+                              title="Delete Variant"
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="1.8"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                              />
-                            </svg>
-                          </button>
+                              <svg
+                                className="w-4 h-4"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="1.8"
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
                         </td>
                       </tr>
                     );

@@ -30,13 +30,15 @@ export const addProductVariants = async ({ formData, productId }) => {
   return response.data;
 };
 
-// export const addVariant = async (productId, variantData) => {
-//   const isFormData = variantData instanceof FormData;
-//   const response = await api.post(`/${productId}/variants`, variantData, {
-//     headers: isFormData ? { "Content-Type": "multipart/form-data" } : {},
-//   });
-//   return response.data;
-// };
+export const deleteProductVariant = async ({ productId, variantId }) => {
+  const response = await api.delete(`/seller/delete/variant/${productId}/${variantId}`);
+  return response.data;
+};
+
+export const deleteProduct = async ( productId ) => {
+  const response = await api.delete(`/seller/delete/product/${productId}`);
+  return response.data;
+};
 
 // export const updateVariantStock = async (productId, variantId, stock) => {
 //   const response = await api.patch(`/${productId}/variants/${variantId}/stock`, {
@@ -45,7 +47,3 @@ export const addProductVariants = async ({ formData, productId }) => {
 //   return response.data;
 // };
 
-// export const deleteVariant = async (productId, variantId) => {
-//   const response = await api.delete(`/${productId}/variants/${variantId}`);
-//   return response.data;
-// };

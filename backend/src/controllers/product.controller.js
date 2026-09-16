@@ -90,7 +90,7 @@ export const addProductVariant = async (req, res) => {
     });
   }
 
-  if (files || req.files?.length > 0) {
+  if (files || files?.length > 0) {
     (
       await Promise.all(
         files.map(async (file) => {
@@ -127,76 +127,64 @@ export const addProductVariant = async (req, res) => {
   });
 };
 
-// edit product 
-//delete product
+export const deleteProductVariant = async (req, res) => {
+  const productId = req.params.productId;
+  const variantId = req.params.variantId;
+  const userId = req.user._id;
+
+  const variant = await productModel.findOne({
+    _id: productId,
+    seller: userId,
+    variants: {
+      $elemMatch: {
+        _id: variantId,
+      },
+    },
+  });
+
+  if (!variant) {
+    return res.status(404).json({
+      message: "variant not found",
+      success: false,
+    });
+  }
+
+  await productModel.findOneAndUpdate(
+    { _id: productId, seller: userId },
+    { $pull: { variants: { _id: variantId } } },
+    { new: true },
+  );
+
+  return res.status(200).json({
+    message: "variant deleted ",
+    success: true,
+  });
+};
+
+export const deleteProduct = async (req, res) => {
+  const userId = req.user._id;
+  const productId = req.params.productId;
+
+  const product = await productModel.findOneAndDelete({
+    _id: productId,
+    seller: userId,
+  });
+
+  if (!product) {
+    return res.status(404).json({
+      message: "product not found",
+      success: false,
+    });
+  }
+
+  return res.status(200).json({
+    message: "product deleted",
+    success: true,
+  });
+};
+
+// edit product
 //update vaiant
-//delete variant
-
-// export const addVariant = async (req, res) => {
-//   try {
-//     const { productId } = req.params;
-//     const { stock, priceAmount, priceCurrency, attributes, imageUrl } = req.body;
-//     const seller = req.user;
-
-//     const product = await productModel.findOne({ _id: productId, seller: seller._id });
-//     if (!product) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Product not found or unauthorized",
-//       });
-//     }
-
-//     let images = [];
-//     if (req.files && req.files.length > 0) {
-//       images = await Promise.all(
-//         req.files.map(async (file) => {
-//           return await UploadImage({
-//             buffer: file.buffer,
-//             fileName: file.originalname,
-//           });
-//         })
-//       );
-//     } else if (imageUrl) {
-//       images = [{ url: imageUrl }];
-//     } else if (product.images && product.images.length > 0) {
-//       images = [{ url: product.images[0].url }];
-//     }
-
-//     let parsedAttributes = attributes;
-//     if (typeof attributes === "string") {
-//       try {
-//         parsedAttributes = JSON.parse(attributes);
-//       } catch {
-//         parsedAttributes = {};
-//       }
-//     }
-
-//     const newVariant = {
-//       images,
-//       stock: Number(stock) || 0,
-//       attributes: parsedAttributes || {},
-//       price: {
-//         amount: Number(priceAmount) || product.price.amount,
-//         currency: priceCurrency || product.price.currency || "INR",
-//       },
-//     };
-
-//     product.variants.push(newVariant);
-//     await product.save();
-
-//     return res.status(201).json({
-//       message: "Variant created successfully",
-//       success: true,
-//       product,
-//       variant: product.variants[product.variants.length - 1],
-//     });
-//   } catch (err) {
-//     return res.status(500).json({
-//       success: false,
-//       message: err.message || "Failed to create variant",
-//     });
-//   }
-// };
 
 // export const updateVariantStock = async (req, res) => {
 //   try {
@@ -237,31 +225,3 @@ export const addProductVariant = async (req, res) => {
 //   }
 // };
 
-// export const deleteVariant = async (req, res) => {
-//   try {
-//     const { productId, variantId } = req.params;
-//     const seller = req.user;
-
-//     const product = await productModel.findOne({ _id: productId, seller: seller._id });
-//     if (!product) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "Product not found or unauthorized",
-//       });
-//     }
-
-//     product.variants.pull({ _id: variantId });
-//     await product.save();
-
-//     return res.status(200).json({
-//       message: "Variant removed successfully",
-//       success: true,
-//       product,
-//     });
-//   } catch (err) {
-//     return res.status(500).json({
-//       success: false,
-//       message: err.message || "Failed to delete variant",
-//     });
-//   }
-// };

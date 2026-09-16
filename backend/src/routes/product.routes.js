@@ -4,10 +4,10 @@ import {
   getProductsBySeller,
   getAllProducts,
   getProductById,
-  // addVariant,
   // updateVariantStock,
-  // deleteVariant,
+  deleteProductVariant,
   addProductVariant,
+  deleteProduct,
 } from "../controllers/product.controller.js";
 import { authSellerMiddleware } from "../middlewares/auth.middleware.js";
 import multer from "multer";
@@ -41,24 +41,21 @@ productRouter.post(
   addProductVariant,
 );
 
-// Variant Management routes
-// productRouter.post(
-//   "/:productId/variants",
-//   authSellerMiddleware,
-//   upload.array("images", 5),
-//   addVariant,
-// );
+productRouter.delete(
+  "/seller/delete/variant/:productId/:variantId",
+  authSellerMiddleware,
+  deleteProductVariant,
+);
+productRouter.delete(
+  "/seller/delete/product/:productId",
+  authSellerMiddleware,
+  deleteProduct,
+);
 
 // productRouter.patch(
 //   "/:productId/variants/:variantId/stock",
 //   authSellerMiddleware,
 //   updateVariantStock,
-// );
-
-// productRouter.delete(
-//   "/:productId/variants/:variantId",
-//   authSellerMiddleware,
-//   deleteVariant,
 // );
 
 export default productRouter;
