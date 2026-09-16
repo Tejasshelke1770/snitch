@@ -34,7 +34,6 @@ const ProductDetails = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
-  const [isBagOpen, setIsBagOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState(null);
   const [isAddedSuccess, setIsAddedSuccess] = useState(false);
 
@@ -245,7 +244,11 @@ const ProductDetails = () => {
       ];
     });
 
-    handleAddItem({ productId: product._id, variantId: currentVariant?._id, quantity : quantity });
+    handleAddItem({
+      productId: product._id,
+      variantId: currentVariant?._id,
+      quantity: quantity,
+    });
 
     setIsAddedSuccess(true);
     showToast(
@@ -333,7 +336,7 @@ const ProductDetails = () => {
             {/* Shopping Bag Trigger Button */}
             <button
               id="header-bag-trigger"
-              onClick={() => setIsBagOpen(true)}
+              onClick={() => navigate("/cart")}
               className="relative p-2 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-amber-400 transition-colors"
               aria-label="Open Shopping Bag"
             >
@@ -1005,126 +1008,7 @@ const ProductDetails = () => {
         </div>
       </main>
 
-      {/* ========================================================== */}
-      {/* SLIDE-OVER SHOPPING BAG DRAWER */}
-      {/* ========================================================== */}
-      {isBagOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsBagOpen(false)}
-          />
 
-          {/* Drawer content */}
-          <div className="relative w-full max-w-sm bg-zinc-950 border-l border-zinc-800/90 h-full flex flex-col z-10 shadow-2xl p-5">
-            <div className="flex items-center justify-between pb-3.5 border-b border-zinc-800">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base font-bold text-white uppercase tracking-wider">
-                  Shopping Bag
-                </h2>
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-400/20 text-amber-400 font-mono">
-                  {totalCartCount}
-                </span>
-              </div>
-              <button
-                onClick={() => setIsBagOpen(false)}
-                className="text-zinc-400 hover:text-white p-1 rounded-md hover:bg-zinc-900"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Bag items list */}
-            <div className="flex-1 overflow-y-auto py-3.5 space-y-3">
-              {cartItems.length === 0 ? (
-                <div className="text-center py-10 text-zinc-500">
-                  <p className="text-xs">
-                    Your shopping bag is currently empty.
-                  </p>
-                  <button
-                    onClick={() => setIsBagOpen(false)}
-                    className="mt-3 px-3.5 py-1.5 rounded-md bg-zinc-900 text-amber-400 text-xs font-semibold hover:bg-zinc-800"
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
-              ) : (
-                cartItems.map((item, idx) => (
-                  <div
-                    key={item.key || `${item.productId}-${item.size}-${idx}`}
-                    className="flex gap-3 p-2.5 rounded-lg bg-zinc-900/60 border border-zinc-800/80 items-center"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-12 h-16 object-cover rounded-md bg-zinc-950 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-xs font-semibold text-white truncate">
-                        {item.title}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-x-2 text-[11px] text-zinc-400 mt-0.5">
-                        <span>
-                          Size:{" "}
-                          <span className="text-amber-400 font-bold">
-                            {item.size}
-                          </span>
-                        </span>
-                        {item.attributes && (
-                          <span className="text-zinc-400 text-[10px] truncate max-w-[170px] bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/50">
-                            {item.attributes}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[11px] font-mono text-zinc-300 mt-1">
-                        ₹{Number(item.price).toLocaleString("en-IN")} ×{" "}
-                        {item.quantity} = ₹
-                        {(item.price * item.quantity).toLocaleString("en-IN")}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() =>
-                        setCartItems((prev) => prev.filter((_, i) => i !== idx))
-                      }
-                      className="text-zinc-500 hover:text-rose-400 text-xs p-1"
-                      title="Remove item"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Bag footer */}
-            {cartItems.length > 0 && (
-              <div className="pt-3.5 border-t border-zinc-800 space-y-2.5">
-                <div className="flex justify-between text-xs font-semibold text-white">
-                  <span>Subtotal:</span>
-                  <span className="font-mono text-amber-400">
-                    ₹
-                    {cartItems
-                      .reduce(
-                        (acc, item) => acc + item.price * item.quantity,
-                        0,
-                      )
-                      .toLocaleString("en-IN")}
-                  </span>
-                </div>
-                <button
-                  onClick={() => {
-                    showToast("Checkout preview initiated");
-                  }}
-                  className="w-full h-10 rounded-lg bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold text-xs uppercase tracking-wider transition-colors"
-                >
-                  Proceed to Checkout
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* COMPACT FOOTER */}
       <footer className="mt-auto border-t border-zinc-800/80 bg-zinc-950/80 py-5">
