@@ -15,7 +15,12 @@ const extractImageUrl = (img) => {
 };
 
 const Home = () => {
-  const { handleGetAllProducts, AllProducts = [], error, loading, } = useProduct();
+  const {
+    handleGetAllProducts,
+    AllProducts = [],
+    error,
+    loading,
+  } = useProduct();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -26,7 +31,6 @@ const Home = () => {
 
   // Shopping Bag State
   const [cartItems, setCartItems] = useState([]);
-  const [isBagOpen, setIsBagOpen] = useState(false);
 
   // Wishlist State (Set of Product IDs)
   const [wishlist, setWishlist] = useState(new Set());
@@ -139,29 +143,7 @@ const Home = () => {
     showToast(`Added "${product.title || "Item"}" to Bag`);
   };
 
-  // Remove from Bag
-  const handleRemoveFromBag = (productId, size) => {
-    setCartItems((prev) =>
-      prev.filter(
-        (item) => !(item.product._id === productId && item.size === size),
-      ),
-    );
-  };
 
-  // Adjust quantity
-  const handleUpdateQuantity = (productId, size, delta) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) => {
-          if (item.product._id === productId && item.size === size) {
-            const newQty = item.quantity + delta;
-            return newQty > 0 ? { ...item, quantity: newQty } : null;
-          }
-          return item;
-        })
-        .filter(Boolean),
-    );
-  };
 
   // Toggle Wishlist
   const toggleWishlist = (productId, e) => {
@@ -191,13 +173,7 @@ const Home = () => {
     (acc, item) => acc + item.quantity,
     0,
   );
-  const totalCartPrice = cartItems.reduce(
-    (acc, item) =>
-      acc +
-      Number(item.product.price?.amount ?? item.product.price ?? 0) *
-        item.quantity,
-    0,
-  );
+
 
   return (
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4efe6] font-sans antialiased selection:bg-amber-400 selection:text-zinc-950 flex flex-col relative">
@@ -364,7 +340,7 @@ const Home = () => {
             {/* Bag Button */}
             <button
               type="button"
-              onClick={() => setIsBagOpen(true)}
+              onClick={() => navigate("/cart")}
               aria-label="Shopping Bag"
               className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 border border-amber-500/30 hover:border-amber-400 text-zinc-200 transition-all shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_25px_rgba(245,158,11,0.25)] cursor-pointer"
             >
@@ -747,172 +723,7 @@ const Home = () => {
         )}
       </main>
 
-      {/* SLIDE-OUT SHOPPING BAG DRAWER */}
-      {isBagOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div
-            className="absolute inset-y-0 right-0 max-w-full flex pl-10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="w-screen max-w-md bg-[#0e0e12] border-l border-zinc-800 p-6 flex flex-col justify-between shadow-2xl">
-              {/* Drawer Header */}
-              <div>
-                <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    <h3 className="text-base font-bold text-white uppercase tracking-wider">
-                      Your Atelier Bag ({totalCartCount})
-                    </h3>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsBagOpen(false)}
-                    className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                </div>
 
-                {/* Cart Items List */}
-                <div className="divide-y divide-zinc-800/80 max-h-[55vh] overflow-y-auto mt-4 pr-1">
-                  {cartItems.length === 0 ? (
-                    <div className="py-16 text-center text-zinc-500 text-xs">
-                      <svg
-                        className="w-12 h-12 text-zinc-700 mx-auto mb-2"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="1.5"
-                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        />
-                      </svg>
-                      <span>Your shopping bag is empty.</span>
-                    </div>
-                  ) : (
-                    cartItems.map((item, idx) => (
-                      <div
-                        key={`${item.product._id}-${item.size}-${idx}`}
-                        className="py-4 flex gap-3.5 items-center"
-                      >
-                        <div className="w-16 h-20 rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 shrink-0">
-                          <img
-                            src={extractImageUrl(item.product.images?.[0])}
-                            alt=""
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-xs font-semibold text-white truncate">
-                            {item.product.title}
-                          </h4>
-                          <span className="text-[11px] text-zinc-500 font-mono block">
-                            Size: {item.size} • {formatINR(item.product.price)}
-                          </span>
-                          <div className="flex items-center gap-2 mt-2">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.product._id,
-                                  item.size,
-                                  -1,
-                                )
-                              }
-                              className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 flex items-center justify-center text-xs font-bold hover:bg-zinc-700"
-                            >
-                              -
-                            </button>
-                            <span className="text-xs font-mono text-white px-1">
-                              {item.quantity}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.product._id,
-                                  item.size,
-                                  1,
-                                )
-                              }
-                              className="w-5 h-5 rounded bg-zinc-800 text-zinc-300 flex items-center justify-center text-xs font-bold hover:bg-zinc-700"
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs font-mono font-bold text-amber-400">
-                            {formatINR(
-                              Number(
-                                item.product.price?.amount ??
-                                  item.product.price ??
-                                  0,
-                              ) * item.quantity,
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleRemoveFromBag(item.product._id, item.size)
-                            }
-                            className="text-[10px] text-zinc-500 hover:text-rose-400 mt-2 block"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              {/* Drawer Footer / Subtotal & Checkout */}
-              <div className="pt-4 border-t border-zinc-800 space-y-3">
-                <div className="flex justify-between items-center text-xs font-mono">
-                  <span className="text-zinc-400">SUBTOTAL</span>
-                  <span className="text-sm font-bold text-amber-400">
-                    {formatINR(totalCartPrice)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-[11px] text-zinc-500 font-mono">
-                  <span>INSURED COURIER FREIGHT</span>
-                  <span className="text-emerald-400 font-semibold">FREE</span>
-                </div>
-                <button
-                  type="button"
-                  disabled={cartItems.length === 0}
-                  onClick={() => {
-                    showToast("Order reservation preview generated!");
-                    setIsBagOpen(false);
-                  }}
-                  className="w-full py-3 rounded-xl bg-amber-400 hover:bg-amber-300 disabled:opacity-40 text-zinc-950 font-bold text-xs tracking-wider uppercase transition-all shadow-[0_0_20px_rgba(245,158,11,0.25)] cursor-pointer"
-                >
-                  Proceed to Checkout
-                </button>
-                <p className="text-[10px] text-center text-zinc-500 font-mono">
-                  End-to-end encrypted checkout • Snitch Atelier Verified
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* LUXURY FOOTER */}
       <footer className="relative z-10 bg-[#060608] border-t border-zinc-800/80 text-xs text-zinc-500">
