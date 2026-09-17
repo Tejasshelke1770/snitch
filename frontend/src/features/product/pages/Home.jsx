@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import useProduct from "../hook/useProduct";
 import { useAuth } from "../../auth/hook/useAuth";
+import useCart from "../../cart/hook/useCart";
 
 // Helper to safely extract image URL whether object or string
 const extractImageUrl = (img) => {
@@ -21,6 +22,7 @@ const Home = () => {
     error,
     loading,
   } = useProduct();
+  const {cartItems, handleGetCart} = useCart()
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -29,8 +31,6 @@ const Home = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
 
-  // Shopping Bag State
-  const [cartItems, setCartItems] = useState([]);
 
   // Wishlist State (Set of Product IDs)
   const [wishlist, setWishlist] = useState(new Set());
@@ -40,6 +40,7 @@ const Home = () => {
 
   useEffect(() => {
     handleGetAllProducts();
+    handleGetCart()
   }, []);
 
   // Keyboard shortcut: Cmd/Ctrl + K focuses search bar

@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
+import useCart from "../hook/useCart";
 
 // Format currency into Indian Rupees (₹)
 const formatINR = (val) => {
@@ -37,48 +38,13 @@ const VALID_COUPONS = {
 };
 
 const Cart = () => {
+  const { cartItems : items, loading, error, handleGetCart } = useCart();
   const navigate = useNavigate();
-  const [items, setItems] = useState([]);
+  // const [items, setItems] = useState([]);
 
-  // Load items from localStorage. Defaults to empty array [] so the empty state is displayed when cart is empty.
-  // const [items, setItems] = useState(() => {
-  //   try {
-  //     const stored = localStorage.getItem("snitch_cart");
-  //     if (stored) {
-  //       const parsed = JSON.parse(stored);
-  //       if (Array.isArray(parsed) && parsed.length > 0) {
-  //         return parsed.map((item, idx) => ({
-  //           id: item.key || item._id || item.productId || `cart-item-${idx}`,
-  //           productId: item.productId || item._id || `p-${idx}`,
-  //           title: item.title || item.product?.title || "Apparel Item",
-  //           price: Number(
-  //             item.price?.amount ??
-  //               item.price ??
-  //               item.product?.price?.amount ??
-  //               item.product?.price ??
-  //               0
-  //           ),
-  //           size: item.size || "M",
-  //           color: item.color || "",
-  //           quantity: Number(item.quantity) || 1,
-  //           image: extractImageUrl(item.image || item.product?.images?.[0]),
-  //         }));
-  //       }
-  //     }
-  //   } catch {
-  //     // ignore parsing errors
-  //   }
-  //   return [];
-  // });
-
-  // Sync back to localStorage whenever items change
-  // useEffect(() => {
-  //   try {
-  //     localStorage.setItem("snitch_cart", JSON.stringify(items));
-  //   } catch {
-  //     // ignore storage errors
-  //   }
-  // }, [items]);
+  useEffect(()=>{
+    handleGetCart();
+  },[])
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");

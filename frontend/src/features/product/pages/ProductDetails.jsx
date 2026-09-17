@@ -27,7 +27,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { handleGetProductById } = useProduct();
-  const { handleAddItem, handleGetCart } = useCart();
+  const { handleAddItem, cartItems } = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
@@ -40,23 +40,13 @@ const ProductDetails = () => {
   // Accordion state
   const [expandedSection, setExpandedSection] = useState("details");
 
-  // Local storage synced cart state
-  const [cartItems, setCartItems] = useState(() => {
-    try {
-      const stored = localStorage.getItem("snitch_cart");
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  });
-
   // Fetch product by ID
   useEffect(() => {
     const getProduct = async () => {
       try {
         if (id) {
           const res = await handleGetProductById(id);
-          setProduct(res);
+          setProduct(res.product);
 
           // If product has variants, default to the first variant
           if (
@@ -82,15 +72,6 @@ const ProductDetails = () => {
 
     getProduct();
   }, [id]);
-
-  // Sync cart items to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem("snitch_cart", JSON.stringify(cartItems));
-    } catch (err) {
-      console.error("Failed to save cart to localStorage", err);
-    }
-  }, [cartItems]);
 
   const variantsList = useMemo(() => {
     return Array.isArray(product?.variants) ? product.variants : [];
@@ -157,16 +138,16 @@ const ProductDetails = () => {
     return null;
   }, [currentVariant]);
 
-  const totalCartCount = useMemo(() => {
-    return cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  }, [cartItems]);
-
   const showToast = (message) => {
     setToastMessage(message);
     setTimeout(() => {
       setToastMessage(null);
     }, 2800);
   };
+
+  const cartLength = cartItems.reduce((acc, curr) => {
+    return acc + curr.quantity;
+  }, 0);
 
   // Select size and synchronize with variant if one matches
   const handleSelectSize = (size) => {
@@ -206,44 +187,6 @@ const ProductDetails = () => {
       return;
     }
 
-    const variantAttrs = currentVariant
-      ? getVariantAttributes(currentVariant)
-      : [];
-    const attrsSummary =
-      variantAttrs.length > 0
-        ? variantAttrs.map(([k, v]) => `${k}: ${v}`).join(", ")
-        : null;
-
-    const cartKey = `${product._id}-${selectedSize}-${currentVariant?._id || "base"}`;
-
-    setCartItems((prev) => {
-      const existingIndex = prev.findIndex((item) => item.key === cartKey);
-
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += quantity;
-        return updated;
-      }
-
-      return [
-        ...prev,
-        {
-          key: cartKey,
-          productId: product._id,
-          variantId: currentVariant?._id || null,
-          title: product.title,
-          price: currentPrice.amount,
-          currency: currentPrice.currency,
-          size: selectedSize,
-          quantity: quantity,
-          image:
-            extractImageUrl(imagesList[0]) ||
-            extractImageUrl(product.images?.[0]),
-          attributes: attrsSummary,
-        },
-      ];
-    });
-
     handleAddItem({
       productId: product._id,
       variantId: currentVariant?._id,
@@ -251,11 +194,7 @@ const ProductDetails = () => {
     });
 
     setIsAddedSuccess(true);
-    showToast(
-      `Added ${quantity} × ${product.title} (${selectedSize}${
-        attrsSummary ? ` • ${attrsSummary}` : ""
-      }) to Bag`,
-    );
+    showToast(`Added ${quantity} × ${product.title} to Bag`);
     setTimeout(() => setIsAddedSuccess(false), 2000);
   };
 
@@ -353,9 +292,9 @@ const ProductDetails = () => {
                   d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                 />
               </svg>
-              {totalCartCount > 0 && (
+              {cartLength > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-zinc-950 text-[9px] font-extrabold flex items-center justify-center shadow">
-                  {totalCartCount}
+                  {cartLength}
                 </span>
               )}
             </button>
@@ -1007,8 +946,6 @@ const ProductDetails = () => {
           </section>
         </div>
       </main>
-
-
 
       {/* COMPACT FOOTER */}
       <footer className="mt-auto border-t border-zinc-800/80 bg-zinc-950/80 py-5">
