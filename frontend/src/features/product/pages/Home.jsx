@@ -127,25 +127,6 @@ const Home = () => {
       });
   }, [displayProducts, searchQuery, activeCategory, sortBy]);
 
-  // Add to Bag Handler
-  const handleAddToBag = (product, size = "M", e) => {
-    if (e) e.stopPropagation();
-    setCartItems((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) => item.product._id === product._id && item.size === size,
-      );
-      if (existingIndex > -1) {
-        const updated = [...prev];
-        updated[existingIndex].quantity += 1;
-        return updated;
-      }
-      return [...prev, { product, size, quantity: 1 }];
-    });
-    showToast(`Added "${product.title || "Item"}" to Bag`);
-  };
-
-
-
   // Toggle Wishlist
   const toggleWishlist = (productId, e) => {
     if (e) e.stopPropagation();
@@ -174,7 +155,6 @@ const Home = () => {
     (acc, item) => acc + item.quantity,
     0,
   );
-
 
   return (
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4efe6] font-sans antialiased selection:bg-amber-400 selection:text-zinc-950 flex flex-col relative">
@@ -716,7 +696,6 @@ const Home = () => {
                 formatINR={formatINR}
                 isWishlisted={wishlist.has(product._id)}
                 onToggleWishlist={(e) => toggleWishlist(product._id, e)}
-                onAddToBag={(e) => handleAddToBag(product, "M", e)}
                 openProductDetails={() => navigate(`/product/${product._id}`)}
               />
             ))}
@@ -873,7 +852,6 @@ const ProductCard = ({
   formatINR,
   isWishlisted,
   onToggleWishlist,
-  onAddToBag,
   openProductDetails,
 }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -978,15 +956,6 @@ const ProductCard = ({
               {formatINR(product.price)}
             </span>
           </div>
-
-          <button
-            type="button"
-            onClick={onAddToBag}
-            title="Quick Add to Bag"
-            className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-amber-500/20 hover:border-amber-400 text-amber-400 hover:bg-amber-400 hover:text-zinc-950 text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
-          >
-            <span>+ Bag</span>
-          </button>
         </div>
       </div>
     </article>
