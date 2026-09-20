@@ -46,6 +46,7 @@ productRouter.delete(
   authSellerMiddleware,
   deleteProductVariant,
 );
+
 productRouter.delete(
   "/seller/delete/product/:productId",
   authSellerMiddleware,
