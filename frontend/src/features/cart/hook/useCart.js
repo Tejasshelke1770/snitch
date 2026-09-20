@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
-import { setItems, setLoading, setError } from "../state/cart.slice";
-import { addItem, getCart } from "../service/cart.api";
+import { setItems, setLoading, setError, incrementCartItemQuantity } from "../state/cart.slice";
+import { addItem, addItemQuantity, getCart } from "../service/cart.api";
 
 const useCart = () => {
   const dispatch = useDispatch();
@@ -40,13 +40,37 @@ const useCart = () => {
       dispatch(setLoading(false));
     }
   };
+
+  const handleIncreaseCartItemQuantity = async ({ productId, varientId }) => {
+    try {
+      dispatch(setLoading(true));
+      await addItemQuantity({ productId, varientId });
+      dispatch(incrementCartItemQuantity({productId, varientId}))
+      return { success: true };
+    } catch (err) {
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to increase item quantity. ";
+      dispatch(setError(message));
+      return { success: false, error: message };
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  //decrease stock
   //remove cart item
   //remove all cart
-  //add stock 
-  //remove stock
-  
 
-  return { handleAddItem, handleGetCart, cartItems, loading, error };
+  return {
+    handleAddItem,
+    handleGetCart,
+    handleIncreaseCartItemQuantity,
+    cartItems,
+    loading,
+    error,
+  };
 };
 
 export default useCart;

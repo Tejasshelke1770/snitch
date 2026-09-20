@@ -1,8 +1,8 @@
 import { useEffect, useState, useMemo } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import useProduct from "../hook/useProduct";
-import { useAuth } from "../../auth/hook/useAuth";
 import useCart from "../../cart/hook/useCart";
+import { useAuth } from "../../auth/hook/useAuth";
 
 // Helper to safely extract image URL whether object or string
 const extractImageUrl = (img) => {
@@ -22,15 +22,14 @@ const Home = () => {
     error,
     loading,
   } = useProduct();
-  const {cartItems, handleGetCart} = useCart()
-  const { user } = useAuth();
+  const { handleGetCart } = useCart();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   // Search, Filter & Sorter State
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchQuery = searchParams.get("search") || "";
   const [activeCategory, setActiveCategory] = useState("all");
   const [sortBy, setSortBy] = useState("featured");
-
 
   // Wishlist State (Set of Product IDs)
   const [wishlist, setWishlist] = useState(new Set());
@@ -40,7 +39,7 @@ const Home = () => {
 
   useEffect(() => {
     handleGetAllProducts();
-    handleGetCart()
+    handleGetCart();
   }, []);
 
   // Keyboard shortcut: Cmd/Ctrl + K focuses search bar
@@ -150,12 +149,6 @@ const Home = () => {
     return `₹${num.toLocaleString("en-IN")}`;
   };
 
-  // Total Bag Count and Price
-  const totalCartCount = cartItems.reduce(
-    (acc, item) => acc + item.quantity,
-    0,
-  );
-
   return (
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4efe6] font-sans antialiased selection:bg-amber-400 selection:text-zinc-950 flex flex-col relative">
       {/* Warm Ambient Glow Effects */}
@@ -183,171 +176,6 @@ const Home = () => {
           <span>{toastMessage}</span>
         </div>
       )}
-
-      {/* STICKY LUXURY NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-[#09090b]/90 backdrop-blur-xl border-b border-zinc-800/90 transition-all">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
-          {/* Brand Anchor */}
-          <div className="flex items-center gap-6">
-            <Link to="/" className="group flex items-center gap-2.5">
-              <span className="text-xl sm:text-2xl font-black tracking-[0.25em] text-white group-hover:text-amber-400 transition-colors uppercase">
-                SNITCH
-              </span>
-            </Link>
-          </div>
-
-          {/* Center Search Input */}
-          <div className="hidden md:flex items-center flex-1 max-w-sm mx-4">
-            <div className="relative w-full">
-              <svg
-                className="w-4 h-4 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-              <input
-                id="store-search-input"
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search archive, cut, fabric, seller..."
-                className="w-full bg-zinc-900/80 border border-zinc-800 rounded-full pl-9 pr-14 py-1.5 text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none focus:border-amber-400/80 focus:ring-1 focus:ring-amber-400/50 transition-all"
-              />
-              {searchQuery ? (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300"
-                >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              ) : (
-                <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-zinc-500 border border-zinc-700/60 rounded px-1.5 py-0.5 bg-zinc-800/80">
-                  ⌘K
-                </kbd>
-              )}
-            </div>
-          </div>
-
-          {/* Right Action Cluster */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Atelier Seller Portal Link */}
-            <Link
-              to="/seller/dashboard"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900/90 border border-amber-500/20 text-zinc-300 hover:text-amber-400 hover:border-amber-400/40 text-xs font-medium transition-all"
-            >
-              <svg
-                className="w-3.5 h-3.5 text-amber-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                />
-              </svg>
-              <span className="hidden sm:inline">Seller Atelier</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            </Link>
-
-            {/* Auth Link (Sign In or User Initial) */}
-            {user ? (
-              <span
-                title={user.email || user.fullname}
-                className="w-8 h-8 rounded-xl bg-zinc-900 border border-amber-500/30 text-amber-400 font-bold text-xs flex items-center justify-center cursor-default"
-              >
-                {(user.fullname?.[0] || user.email?.[0] || "U").toUpperCase()}
-              </span>
-            ) : (
-              <Link
-                to="/login"
-                className="px-3 py-1.5 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-xs font-medium transition-all"
-              >
-                Sign In
-              </Link>
-            )}
-
-            {/* Wishlist Button */}
-            <button
-              type="button"
-              onClick={() =>
-                showToast(`${wishlist.size} saved items in wishlist`)
-              }
-              aria-label="Saved items"
-              className="relative p-2 rounded-xl bg-zinc-900/70 border border-zinc-800 hover:border-amber-400/30 text-zinc-400 hover:text-amber-400 transition-all cursor-pointer"
-            >
-              <svg
-                className="w-4 h-4"
-                fill={wishlist.size > 0 ? "#f59e0b" : "none"}
-                stroke={wishlist.size > 0 ? "#f59e0b" : "currentColor"}
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                />
-              </svg>
-              {wishlist.size > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-zinc-950 font-bold text-[9px] flex items-center justify-center">
-                  {wishlist.size}
-                </span>
-              )}
-            </button>
-
-            {/* Bag Button */}
-            <button
-              type="button"
-              onClick={() => navigate("/cart")}
-              aria-label="Shopping Bag"
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-900 border border-amber-500/30 hover:border-amber-400 text-zinc-200 transition-all shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_25px_rgba(245,158,11,0.25)] cursor-pointer"
-            >
-              <svg
-                className="w-4 h-4 text-amber-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
-              <span className="text-xs font-semibold hidden sm:inline">
-                Bag
-              </span>
-              <span className="w-5 h-5 rounded-full bg-amber-400 text-zinc-950 font-bold text-[11px] flex items-center justify-center">
-                {totalCartCount}
-              </span>
-            </button>
-          </div>
-        </div>
-      </header>
 
       {/* HERO SECTION: AUREATE OBSIDIAN CAPSULE RELEASE */}
       <section className="relative z-10 overflow-hidden bg-[#070709] border-b border-zinc-800/80">
@@ -702,8 +530,6 @@ const Home = () => {
           </div>
         )}
       </main>
-
-
 
       {/* LUXURY FOOTER */}
       <footer className="relative z-10 bg-[#060608] border-t border-zinc-800/80 text-xs text-zinc-500">

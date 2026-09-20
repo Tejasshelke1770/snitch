@@ -38,13 +38,19 @@ const VALID_COUPONS = {
 };
 
 const Cart = () => {
-  const { cartItems : items, loading, error, handleGetCart } = useCart();
+  const {
+    cartItems: items,
+    loading,
+    error,
+    handleGetCart,
+    handleIncreaseCartItemQuantity,
+  } = useCart();
   const navigate = useNavigate();
   // const [items, setItems] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     handleGetCart();
-  },[])
+  }, []);
 
   // Coupon state
   const [couponInput, setCouponInput] = useState("");
@@ -60,30 +66,29 @@ const Cart = () => {
   };
 
   // Quantity updates
-  const handleQuantityChange = (id, delta) => {
-    setItems((prev) =>
-      prev
-        .map((item) => {
-          if (item.id === id) {
-            const nextQty = item.quantity + delta;
-            return nextQty > 0 ? { ...item, quantity: nextQty } : null;
-          }
-          return item;
-        })
-        .filter(Boolean),
-    );
+  const handleQuantityChange = async (item) => {
+    const { success, error } = await handleIncreaseCartItemQuantity({
+      productId: item.product._id,
+      varientId: item.variant,
+    });
+    if (success) {
+      // handleGetCart();
+    }
+    if (error) {
+      setToastMessage(error);
+    }
   };
 
   // Remove single item
   const handleRemoveItem = (id) => {
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    // setItems((prev) => prev.filter((item) => item.id !== id));
     showToast("Item removed from cart");
   };
 
   // Clear entire cart
   const handleClearCart = () => {
     if (window.confirm("Are you sure you want to empty your cart?")) {
-      setItems([]);
+      // setItems([]);
       setAppliedCoupon(null);
       showToast("Cart cleared");
     }
@@ -151,62 +156,6 @@ const Cart = () => {
           <span>{toastMessage}</span>
         </div>
       )}
-
-      {/* HEADER / NAVIGATION BAR */}
-      <header className="w-full bg-[#09090b]/90 border-b border-zinc-800/80 sticky top-0 z-40 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
-          {/* Back Action */}
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="group flex items-center gap-2 text-zinc-400 hover:text-amber-400 transition-colors text-xs font-semibold tracking-wider uppercase cursor-pointer"
-          >
-            <svg
-              className="w-4 h-4 transition-transform group-hover:-translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            <span>Continue Shopping</span>
-          </button>
-
-          {/* Snitch Wordmark */}
-          <Link to="/" className="text-center group flex flex-col items-center">
-            <span className="text-xl sm:text-2xl font-black tracking-[0.25em] text-white group-hover:text-amber-400 transition-colors uppercase">
-              SNITCH
-            </span>
-          </Link>
-
-          {/* Cart Counter & Security Info */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-mono text-amber-400">
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
-              <span>
-                {totalItemCount} {totalItemCount === 1 ? "Item" : "Items"}
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* MAIN CONTENT CANVAS */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 z-10">
@@ -360,7 +309,7 @@ const Cart = () => {
                               </span>
                               <button
                                 type="button"
-                                onClick={() => handleQuantityChange(item.id, 1)}
+                                onClick={() => handleQuantityChange(item)}
                                 aria-label="Increase quantity"
                                 className="w-8 h-8 flex items-center justify-center text-zinc-300 hover:text-amber-400 hover:bg-zinc-800 text-sm font-bold transition-colors cursor-pointer"
                               >

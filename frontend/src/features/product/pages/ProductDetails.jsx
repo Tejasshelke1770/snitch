@@ -27,7 +27,7 @@ const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { handleGetProductById } = useProduct();
-  const { handleAddItem, cartItems } = useCart();
+  const { handleAddItem, handleGetCart} = useCart();
 
   const [product, setProduct] = useState(null);
   const [selectedVariantId, setSelectedVariantId] = useState(null);
@@ -69,7 +69,6 @@ const ProductDetails = () => {
         console.error("Failed to fetch product:", err);
       }
     };
-
     getProduct();
   }, [id]);
 
@@ -145,10 +144,6 @@ const ProductDetails = () => {
     }, 2800);
   };
 
-  const cartLength = cartItems.reduce((acc, curr) => {
-    return acc + curr.quantity;
-  }, 0);
-
   // Select size and synchronize with variant if one matches
   const handleSelectSize = (size) => {
     setSelectedSize(size);
@@ -179,7 +174,7 @@ const ProductDetails = () => {
   };
 
   // Add to Cart handler (with variant attributes and fallback values)
-  const handleAddItemToCart = () => {
+  const handleAddItemToCart = async() => {
     if (!product) return;
 
     if (currentStock === 0) {
@@ -187,11 +182,14 @@ const ProductDetails = () => {
       return;
     }
 
-    handleAddItem({
+    await handleAddItem({
       productId: product._id,
       variantId: currentVariant?._id,
       quantity: quantity,
     });
+    // await handleGetCart();
+    //add item to local store 
+    // no need to create an extra call to db for getCart
 
     setIsAddedSuccess(true);
     showToast(`Added ${quantity} × ${product.title} to Bag`);
@@ -239,68 +237,7 @@ const ProductDetails = () => {
       )}
 
       {/* COMPACT NAVIGATION BAR */}
-      <header className="sticky top-0 z-40 bg-[#09090b]/90 backdrop-blur-xl border-b border-zinc-800/80">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          {/* Brand Anchor */}
-          <div className="flex items-center gap-4">
-            <Link to="/" className="group flex items-center gap-1.5">
-              <span className="text-lg sm:text-xl font-black tracking-[0.25em] text-white group-hover:text-amber-400 transition-colors uppercase">
-                SNITCH
-              </span>
-            </Link>
-          </div>
 
-          {/* Quick Back & Actions */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/")}
-              className="inline-flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-zinc-400 hover:text-amber-300 transition-colors py-1.5 px-2.5 rounded-md hover:bg-zinc-800/60"
-            >
-              <svg
-                className="w-3.5 h-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                />
-              </svg>
-              <span>Back</span>
-            </button>
-
-            {/* Shopping Bag Trigger Button */}
-            <button
-              id="header-bag-trigger"
-              onClick={() => navigate("/cart")}
-              className="relative p-2 rounded-lg bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800/80 text-zinc-300 hover:text-amber-400 transition-colors"
-              aria-label="Open Shopping Bag"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1.8"
-                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                />
-              </svg>
-              {cartLength > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-400 text-zinc-950 text-[9px] font-extrabold flex items-center justify-center shadow">
-                  {cartLength}
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
 
       {/* COMPACT BREADCRUMB */}
       <nav
