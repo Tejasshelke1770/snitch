@@ -21,21 +21,6 @@ const extractImageUrl = (img) => {
   );
 };
 
-// Recognized coupon codes
-const VALID_COUPONS = {
-  SNITCH10: {
-    code: "SNITCH10",
-    discountType: "percent",
-    value: 10,
-    label: "10% Off",
-  },
-  FLAT500: {
-    code: "FLAT500",
-    discountType: "fixed",
-    value: 500,
-    label: "₹500 Off",
-  },
-};
 
 const Cart = () => {
   const {
@@ -51,11 +36,6 @@ const Cart = () => {
   useEffect(() => {
     handleGetCart();
   }, []);
-
-  // Coupon state
-  const [couponInput, setCouponInput] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
-  const [couponError, setCouponError] = useState("");
 
   // Toast notification feedback
   const [toastMessage, setToastMessage] = useState(null);
@@ -89,30 +69,8 @@ const Cart = () => {
   const handleClearCart = () => {
     if (window.confirm("Are you sure you want to empty your cart?")) {
       // setItems([]);
-      setAppliedCoupon(null);
       showToast("Cart cleared");
     }
-  };
-
-  // Coupon actions
-  const handleApplyCoupon = () => {
-    setCouponError("");
-    const cleaned = couponInput.trim().toUpperCase();
-    if (!cleaned) return;
-
-    if (VALID_COUPONS[cleaned]) {
-      setAppliedCoupon(VALID_COUPONS[cleaned]);
-      setCouponInput("");
-      showToast(`Coupon "${cleaned}" applied!`);
-    } else {
-      setCouponError("Invalid coupon code. Try 'SNITCH10' or 'FLAT500'.");
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
-    setCouponError("");
-    showToast("Coupon removed");
   };
 
   // Price calculations
@@ -124,22 +82,11 @@ const Cart = () => {
     return items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   }, [items]);
 
-  const discountAmount = useMemo(() => {
-    if (!appliedCoupon || subtotal === 0) return 0;
-    if (appliedCoupon.discountType === "fixed") {
-      return Math.min(appliedCoupon.value, subtotal);
-    }
-    if (appliedCoupon.discountType === "percent") {
-      return Math.round((subtotal * appliedCoupon.value) / 100);
-    }
-    return 0;
-  }, [appliedCoupon, subtotal]);
-
   const FREE_SHIPPING_LIMIT = 2999;
   const isFreeShipping = subtotal >= FREE_SHIPPING_LIMIT;
   const shippingCharge = subtotal > 0 && !isFreeShipping ? 199 : 0;
 
-  const grandTotal = Math.max(0, subtotal - discountAmount + shippingCharge);
+  const grandTotal = Math.max(0, subtotal + shippingCharge);
 
   return (
     <div className="min-h-screen w-full bg-[#09090b] text-[#f4efe6] font-sans antialiased selection:bg-amber-400 selection:text-zinc-950 flex flex-col relative">
@@ -242,7 +189,7 @@ const Cart = () => {
               {/* Items Cards */}
               <div className="space-y-4">
                 {items.map((item) => {
-                  const lineTotal = item.price * item.quantity;
+                  const lineTotal = item.price.amount * item.quantity;
 
                   return (
                     <article
@@ -264,7 +211,7 @@ const Cart = () => {
                           <div className="flex justify-between items-start gap-3">
                             <div>
                               <h2 className="text-sm sm:text-base font-bold text-white tracking-tight leading-snug">
-                                {item.title}
+                                {item.product.title}
                               </h2>
                               {item.size && (
                                 <p className="text-xs text-zinc-400 mt-1 font-mono">
@@ -284,7 +231,7 @@ const Cart = () => {
                               </p>
                               {item.quantity > 1 && (
                                 <p className="text-[10px] font-mono text-zinc-500">
-                                  {formatINR(item.price)} each
+                                  {formatINR(item.price.amount)} each
                                 </p>
                               )}
                             </div>
@@ -354,52 +301,8 @@ const Cart = () => {
                   Order Summary
                 </h2>
 
-                {/* Promo Code Input */}
-                <div className="space-y-2 my-4">
-                  <label className="text-[11px] font-mono text-zinc-400 uppercase tracking-wider block">
-                    Promo Code
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={couponInput}
-                      onChange={(e) => setCouponInput(e.target.value)}
-                      placeholder="e.g. SNITCH10"
-                      className="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg py-2 px-3 text-xs text-amber-400 font-mono font-semibold focus:border-amber-400 focus:outline-none uppercase placeholder:text-zinc-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      className="px-3.5 py-2 rounded-lg bg-zinc-800 hover:bg-amber-400 hover:text-zinc-950 border border-zinc-700 text-zinc-200 text-xs font-bold transition-all cursor-pointer"
-                    >
-                      Apply
-                    </button>
-                  </div>
-
-                  {couponError && (
-                    <p className="text-[11px] text-rose-400 font-mono">
-                      {couponError}
-                    </p>
-                  )}
-
-                  {appliedCoupon && (
-                    <div className="flex items-center justify-between text-xs bg-amber-400/10 border border-amber-500/30 p-2 rounded-lg text-amber-300 font-medium">
-                      <span>
-                        Applied: {appliedCoupon.code} ({appliedCoupon.label})
-                      </span>
-                      <button
-                        type="button"
-                        onClick={handleRemoveCoupon}
-                        className="text-[11px] text-zinc-400 hover:text-rose-400 cursor-pointer"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  )}
-                </div>
-
                 {/* Cost Breakdown */}
-                <div className="space-y-2.5 pt-3 border-t border-zinc-800 text-xs font-mono">
+                <div className="space-y-2.5 pt-3 text-xs font-mono">
                   <div className="flex justify-between text-zinc-400">
                     <span>
                       Subtotal ({totalItemCount}{" "}
@@ -407,13 +310,6 @@ const Cart = () => {
                     </span>
                     <span className="text-white">{formatINR(subtotal)}</span>
                   </div>
-
-                  {appliedCoupon && (
-                    <div className="flex justify-between text-amber-400 font-semibold">
-                      <span>Coupon Discount</span>
-                      <span>-{formatINR(discountAmount)}</span>
-                    </div>
-                  )}
 
                   <div className="flex justify-between text-zinc-400">
                     <span>Shipping</span>
